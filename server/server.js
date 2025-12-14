@@ -51,8 +51,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health check endpoint (before routes)
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'ISSAT Server is running',
     timestamp: new Date().toISOString(),
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
@@ -61,7 +61,7 @@ app.get('/api/health', (req, res) => {
 
 // Root endpoint
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'ISSAT Kairouan API Server',
     version: '1.0.0',
     endpoints: {
@@ -92,7 +92,7 @@ app.use('/api/timetable', timetableRoutes);
 // 404 handler for undefined API routes (MUST BE LAST)
 app.use('/api/*', (req, res) => {
   console.log(`❌ 404 - Route not found: ${req.method} ${req.originalUrl}`);
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'Route not found',
     method: req.method,
     path: req.originalUrl,
@@ -112,7 +112,7 @@ app.use('/api/*', (req, res) => {
 const MONGODB_URI = (process.env.MONGODB_URI || 'mongodb://localhost:27017/issat').trim();
 
 // Start server even if MongoDB connection fails (for testing)
-const PORT = process.env.PORT || 5000;
+const PORT = 5001; // Explicitly set port to 5001 as requested
 
 mongoose
   .connect(MONGODB_URI)
