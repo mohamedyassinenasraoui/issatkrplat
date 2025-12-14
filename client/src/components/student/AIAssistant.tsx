@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Send, Bot, User, Sparkles } from "lucide-react";
+import { Send, Bot, User, Sparkles, Upload, FileText, X, CheckCircle, AlertCircle } from "lucide-react";
 import api from "../../services/api";
 
 const OFFICIAL_BASE = "https://issatkr.rnu.tn/";
@@ -292,7 +292,17 @@ export default function AIAssistant() {
 
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
+  const [uploadingCert, setUploadingCert] = useState(false);
+  const [certAnalysis, setCertAnalysis] = useState<{
+    isLegitimate: boolean;
+    confidence: number;
+    reason: string;
+    message?: string;
+    redFlags?: string[];
+    positives?: string[];
+  } | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const certFileInputRef = useRef<HTMLInputElement>(null);
 
   const [flow, setFlow] = useState<FlowData | null>(null);
 
@@ -302,6 +312,7 @@ export default function AIAssistant() {
       "Comment justifier une absence ?",
       "J'ai 3 absences, quel est le risque ?",
       "Quelles sont les règles d'élimination ?",
+      "Vérifier un certificat PDF",
       "How can I request a student certificate?",
     ],
     []
@@ -606,6 +617,76 @@ export default function AIAssistant() {
             <div ref={endRef} />
           </div>
 
+          {/* Certificate Analysis Result */}
+          {certAnalysis && (
+            <div style={{ 
+              padding: "12px", 
+              borderTop: "1px solid #1d5b45", 
+              background: certAnalysis.isLegitimate ? "#0f2a20" : "#2a0707",
+              borderLeft: `4px solid ${certAnalysis.isLegitimate ? "#2cff9d" : "#ff5b5b"}`,
+            }}>
+              <div style={{ display: "flex", alignItems: "start", gap: 10 }}>
+                {certAnalysis.isLegitimate ? (
+                  <CheckCircle size={20} color="#2cff9d" />
+                ) : (
+                  <AlertCircle size={20} color="#ff5b5b" />
+                )}
+                <div style={{ flex: 1 }}>
+                  <div style={{ 
+                    fontWeight: "bold", 
+                    marginBottom: 4,
+                    color: certAnalysis.isLegitimate ? "#2cff9d" : "#ff5b5b",
+                  }}>
+                    {certAnalysis.isLegitimate ? "✅ Certificat légitime" : "❌ Certificat suspect"}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#c7ffe0", marginBottom: 4 }}>
+                    Confiance: {(certAnalysis.confidence * 100).toFixed(0)}%
+                  </div>
+                  <div style={{ fontSize: 12, color: "#c7ffe0", marginBottom: 4 }}>
+                    {certAnalysis.reason}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#c7ffe0", marginBottom: 4 }}>
+                    {certAnalysis.message}
+                  </div>
+                  {certAnalysis.positives && certAnalysis.positives.length > 0 && (
+                    <div style={{ marginTop: 8 }}>
+                      <div style={{ fontSize: 11, color: "#59ffb3", marginBottom: 4 }}>✓ Points positifs:</div>
+                      <ul style={{ fontSize: 11, color: "#c7ffe0", marginLeft: 16 }}>
+                        {certAnalysis.positives.map((pos, idx) => (
+                          <li key={idx}>{pos}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {certAnalysis.redFlags && certAnalysis.redFlags.length > 0 && (
+                    <div style={{ marginTop: 8 }}>
+                      <div style={{ fontSize: 11, color: "#ff5b5b", marginBottom: 4 }}>⚠️ Problèmes détectés:</div>
+                      <ul style={{ fontSize: 11, color: "#ffb3b3", marginLeft: 16 }}>
+                        {certAnalysis.redFlags.map((flag, idx) => (
+                          <li key={idx}>{flag}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setCertAnalysis(null)}
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: 8,
+                    background: "transparent",
+                    border: "1px solid #1d5b45",
+                    color: "#c7ffe0",
+                    cursor: "pointer",
+                    fontSize: 11,
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -613,6 +694,91 @@ export default function AIAssistant() {
             }}
             style={{ display: "flex", gap: 8, padding: 12, borderTop: "1px solid #1d5b45" }}
           >
+            <input
+              type="file"
+              ref={certFileInputRef}
+              accept=".pdf"
+              style={{ display: "none" }}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+
+                if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+                  pushAssistant("❌ Seuls les fichiers PDF sont acceptés.");
+                  return;
+                }
+
+                setUploadingCert(true);
+                setCertAnalysis(null);
+                const formData = new FormData();
+                formData.append('certificate', file);
+
+                try {
+                  const response = await api.post('/ai/validate-certificate', formData, {
+                    headers: {
+                      'Content-Type': 'multipart/form-data',
+                    },
+                  });
+                  
+                  const validation = response.data.validation;
+                  
+                  setCertAnalysis({
+                    isLegitimate: validation.status === 'legitimate' || validation.status === 'needs_review',
+                    confidence: validation.confidence === 'high' ? 0.9 : validation.confidence === 'medium' ? 0.7 : 0.5,
+                    reason: `Statut: ${validation.status}, Confiance: ${validation.confidence}`,
+                    message: response.data.message || 'Analyse terminée',
+                    redFlags: validation.issues || [],
+                    positives: validation.positives || [],
+                  });
+
+                  if (response.data.success && response.data.sentToAdmin) {
+                    pushAssistant(`✅ ${response.data.message || 'Certificat validé et envoyé à l\'administration'}`);
+                    if (response.data.justificationId) {
+                      pushAssistant(`📋 Justification créée avec succès. ID: ${response.data.justificationId}`);
+                    }
+                  } else if (validation.status === 'fraudulent') {
+                    pushAssistant(`🔴 ${response.data.message || 'Certificat détecté comme frauduleux'}`);
+                  } else {
+                    pushAssistant(`⚠️ ${response.data.message || 'Certificat suspect - nécessite une vérification manuelle'}`);
+                  }
+                } catch (error: any) {
+                  console.error('Certificate validation error:', error);
+                  pushAssistant(error.response?.data?.message || "❌ Erreur lors de la validation du certificat. Veuillez réessayer.");
+                } finally {
+                  setUploadingCert(false);
+                  if (certFileInputRef.current) {
+                    certFileInputRef.current.value = '';
+                  }
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => certFileInputRef.current?.click()}
+              disabled={uploadingCert || thinking}
+              className="hover:bg-[#1a3d2d] transition-colors disabled:opacity-50"
+              style={{
+                borderRadius: 12,
+                padding: "10px 12px",
+                background: "#0f2a20",
+                border: "1px solid #1d5b45",
+                color: "white",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+              title="Analyser un certificat PDF"
+            >
+              {uploadingCert ? (
+                <span style={{ fontSize: 12 }}>⏳</span>
+              ) : (
+                <Upload size={16} />
+              )}
+              <span style={{ fontSize: 12 }}>
+                {uploadingCert ? "Analyse..." : "Certificat PDF"}
+              </span>
+            </button>
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}

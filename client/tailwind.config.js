@@ -17,6 +17,13 @@ export default {
           redLight: '#D93954',  // Lighter red
           redDark: '#A11830',   // Darker red
         },
+        // Official landing page colors
+        official: {
+          blue: '#2B4C66',      // Bleu profond
+          cream: '#F5F4EF',     // Blanc cassé
+          olive: '#6B8E23',     // Vert olive
+          sand: '#E3C6A4',      // Sable/Ocre
+        },
         // Academic theme (light mode)
         academic: {
           bg: '#F8FAFC',        // Light gray background
@@ -46,6 +53,9 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         serif: ['Georgia', 'serif'],
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
       },
     },
   },

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import OpenAI from "openai";
+import PDFReader from "./PDFReader";
 
 const OFFICIAL_BASE = "https://issatkr.rnu.tn/";
 
@@ -67,6 +68,19 @@ function getIntent(q) {
   if (t.includes("absence") || t.includes("absences") || t.includes("justif") || t.includes("élim") || t.includes("elim"))
     return "absence";
   if (
+    t.includes("vérifier") ||
+    t.includes("verifier") ||
+    t.includes("valider") ||
+    t.includes("validate") ||
+    t.includes("check") ||
+    t.includes("fraud") ||
+    t.includes("fraude") ||
+    t.includes("legitime") ||
+    t.includes("legitimate") ||
+    (t.includes("certificat") && (t.includes("pdf") || t.includes("fichier") || t.includes("file")))
+  )
+    return "certificate_validation";
+  if (
     t.includes("attestation") ||
     t.includes("certificat") ||
     t.includes("inscription") ||
@@ -82,15 +96,29 @@ function getIntent(q) {
 }
 
 function buildActions(intent, lang) {
+  if (intent === "certificate_validation") {
+    return lang === "fr"
+      ? [
+          { id: "validate_certificate", label: "🔍 Vérifier un certificat PDF" },
+          { id: "open_site", label: "🌐 Site officiel" },
+        ]
+      : [
+          { id: "validate_certificate", label: "🔍 Validate PDF Certificate" },
+          { id: "open_site", label: "🌐 Official website" },
+        ];
+  }
+
   if (intent === "docs") {
     return lang === "fr"
       ? [
           { id: "request_doc", label: "📄 Demander un document" },
+          { id: "validate_certificate", label: "🔍 Vérifier un certificat" },
           { id: "track_requests", label: "🕒 Suivre mes demandes (Docs)" },
           { id: "open_site", label: "🌐 Site officiel" },
         ]
       : [
           { id: "request_doc", label: "📄 Request a document" },
+          { id: "validate_certificate", label: "🔍 Validate certificate" },
           { id: "track_requests", label: "🕒 Track my requests (Docs)" },
           { id: "open_site", label: "🌐 Official website" },
         ];
@@ -321,7 +349,7 @@ export default function Assistant() {
     {
       role: "assistant",
       text:
-        "Hello / Bonjour 👋\n\nI’m the ISSAT Assistant.\nJe peux t’aider sur :\n- Procédures administratives\n- Absences & justifications\n- Filières, modules, coefficients\n\nAsk your question 👇",
+        "Hello / Bonjour 👋\n\nI'm the ISSAT Assistant.\nJe peux t'aider sur :\n- Procédures administratives\n- Absences & justifications\n- Filières, modules, coefficients\n- Vérification de certificats (PDF)\n\nAsk your question 👇",
       actions: buildActions("general", "en"),
       time: nowTime(),
     },
@@ -332,15 +360,19 @@ export default function Assistant() {
   const endRef = useRef(null);
 
   const [flow, setFlow] = useState(null);
+  const [showPDFReader, setShowPDFReader] = useState(false);
+  const [certificateResult, setCertificateResult] = useState(null);
 
   const quickPrompts = useMemo(
     () => [
       "Comment faire une attestation ?",
       "Comment justifier une absence ?",
       "J'ai 3 absences, quel est le risque ?",
-      "Quelles sont les règles d’élimination ?",
+      "Vérifier un certificat PDF",
+      "Quelles sont les règles d'élimination ?",
       "Quels sont les modules et coefficients ?",
       "How can I request a student certificate?",
+      "Validate PDF certificate",
     ],
     []
   );
@@ -451,6 +483,16 @@ export default function Assistant() {
       return;
     }
 
+    if (action.id === "validate_certificate") {
+      setShowPDFReader(true);
+      pushAssistant(
+        lang === "fr"
+          ? "📄 Téléchargez votre certificat PDF pour vérifier sa légitimité. Le système analysera les éléments essentiels et détectera d'éventuelles fraudes."
+          : "📄 Upload your PDF certificate to verify its legitimacy. The system will analyze essential elements and detect potential fraud."
+      );
+      return;
+    }
+
     if (action.id === "submit_justif") {
       const f = { kind: "JUSTIFICATION", step: 0, data: {}, lang };
       setFlow(f);
@@ -468,11 +510,30 @@ export default function Assistant() {
     if (action.id === "track_requests" || action.id === "track_requests_justif") {
       pushAssistant(
         lang === "fr"
-          ? "📁 Suivi: vos demandes seront visibles dans l’espace Documents. L’admin peut accepter/refuser (En attente / Acceptée / Refusée)."
+          ? "📁 Suivi: vos demandes seront visibles dans l'espace Documents. L'admin peut accepter/refuser (En attente / Acceptée / Refusée)."
           : "📁 Tracking: your requests will be visible in the Documents area. Admin can accept/reject (Pending / Accepted / Rejected)."
       );
       return;
     }
+  }
+
+  function handleCertificateValidated(validation) {
+    setCertificateResult(validation);
+    const lang = detectLanguage("");
+    const statusMessages = {
+      legitimate: lang === "fr" ? "✅ Certificat légitime" : "✅ Certificate is legitimate",
+      suspicious: lang === "fr" ? "⚠️ Certificat suspect - nécessite une vérification" : "⚠️ Suspicious certificate - requires review",
+      fraudulent: lang === "fr" ? "🔴 Certificat frauduleux détecté" : "🔴 Fraudulent certificate detected",
+      needs_review: lang === "fr" ? "⚠️ Certificat nécessite une vérification" : "⚠️ Certificate needs review",
+      incomplete: lang === "fr" ? "⚠️ Certificat incomplet" : "⚠️ Incomplete certificate",
+    };
+    
+    pushAssistant(
+      `${statusMessages[validation.status]}\n\n` +
+      (validation.positives.length > 0 ? `✓ Points positifs: ${validation.positives.length}\n` : "") +
+      (validation.issues.length > 0 ? `⚠ Problèmes: ${validation.issues.length}\n` : "") +
+      (lang === "fr" ? "\nVoir les détails ci-dessous." : "\nSee details below.")
+    );
   }
 
   async function send(text) {
@@ -531,10 +592,21 @@ export default function Assistant() {
     const lang = detectLanguage(q);
     const intent = getIntent(q);
 
+    if (intent === "certificate_validation") {
+      setShowPDFReader(true);
+      pushAssistant(
+        lang === "fr"
+          ? "📄 Téléchargez votre certificat PDF ci-dessous pour vérifier sa légitimité. Le système analysera automatiquement les éléments essentiels et détectera d'éventuelles fraudes."
+          : "📄 Upload your PDF certificate below to verify its legitimacy. The system will automatically analyze essential elements and detect potential fraud.",
+        buildActions("certificate_validation", lang)
+      );
+      return;
+    }
+
     if (intent === "absence") {
       const count = parseAbsenceCount(q);
       if (count === null) {
-        pushAssistant(lang === "fr" ? "🧭 Combien d’absences as-tu ? (ex: 2)" : "🧭 How many absences do you have? (e.g., 2)");
+        pushAssistant(lang === "fr" ? "🧭 Combien d'absences as-tu ? (ex: 2)" : "🧭 How many absences do you have? (e.g., 2)");
       } else {
         pushAssistant(buildAbsenceRiskMessage(lang, count), buildActions("absence", lang));
       }
@@ -621,6 +693,30 @@ export default function Assistant() {
             </button>
           </form>
         </div>
+
+        {showPDFReader && (
+          <div style={{ marginTop: 16 }}>
+            <PDFReader onCertificateValidated={handleCertificateValidated} />
+            <button
+              onClick={() => {
+                setShowPDFReader(false);
+                setCertificateResult(null);
+              }}
+              style={{
+                marginTop: 12,
+                padding: "8px 16px",
+                borderRadius: 12,
+                background: "#140707",
+                border: "1px solid #5b1d1d",
+                color: "#ffb3b3",
+                cursor: "pointer",
+                fontSize: 13,
+              }}
+            >
+              Close PDF Reader
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

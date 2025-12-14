@@ -6,6 +6,9 @@ import { ThemeProvider } from './context/ThemeContext';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { Layout } from './components/layout/Layout';
 import Login from './pages/auth/Login';
+import Home from './pages/Home';
+import FiliereDetails from './pages/FiliereDetails';
+import AboutUs from './pages/AboutUs';
 // Student pages
 import StudentDashboard from './pages/student/StudentDashboard';
 import AbsenceTracker from './components/student/AbsenceTracker';
@@ -56,7 +59,10 @@ const AppRoutes: React.FC = () => {
 
   return (
     <Routes>
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/filiere/:filiereId" element={<FiliereDetails />} />
+      <Route path="/about-us" element={<AboutUs />} />
       
       {/* Student Routes */}
       <Route
@@ -127,11 +133,13 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* Default redirect */}
-      <Route
-        path="/"
-        element={<Navigate to={getDefaultRoute()} replace />}
-      />
+      {/* Default redirect for authenticated users */}
+      {user && (
+        <Route
+          path="/home"
+          element={<Navigate to={getDefaultRoute()} replace />}
+        />
+      )}
     </Routes>
   );
 };
