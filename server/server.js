@@ -17,6 +17,7 @@ import suggestionRoutes from './routes/suggestions.js';
 import resultRoutes from './routes/results.js';
 import teacherRoutes from './routes/teacher.js';
 import classhubRoutes from './routes/classhub.js';
+import timetableRoutes from './routes/timetable.js';
 
 dotenv.config();
 
@@ -86,6 +87,7 @@ app.use('/api/suggestions', suggestionRoutes);
 app.use('/api/results', resultRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/classhub', classhubRoutes);
+app.use('/api/timetable', timetableRoutes);
 
 // 404 handler for undefined API routes (MUST BE LAST)
 app.use('/api/*', (req, res) => {

@@ -4,298 +4,349 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { StudentProfile } from '../../types/auth';
 import { 
-  AlertCircle, FileText, Calendar, MessageSquare, Award, 
-  Clock, ArrowRight, Bell
+  Calendar, Clock, ArrowRight, Bell, BookOpen, MapPin,
+  Newspaper, ExternalLink, User
 } from 'lucide-react';
 
-interface DashboardStats {
-  totalAbsences: number;
-  unjustifiedAbsences: number;
-  pendingDocuments: number;
-  unreadMessages: number;
+interface TimetableEntry {
+  _id: string;
+  module: { name: string; code: string };
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+  room: string;
+  type: string;
+  teacher?: { firstName: string; lastName: string };
 }
+
+interface NewsItem {
+  title: string;
+  link: string;
+  date: string;
+}
+
+const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const DAYS_MAP: Record<number, string> = {
+  0: 'Dimanche',
+  1: 'Lundi',
+  2: 'Mardi',
+  3: 'Mercredi',
+  4: 'Jeudi',
+  5: 'Vendredi',
+  6: 'Samedi',
+};
 
 const StudentDashboard: React.FC = () => {
   const { profile: rawProfile } = useAuth();
   const profile = rawProfile as StudentProfile | null;
-  const [stats, setStats] = useState<DashboardStats>({
-    totalAbsences: 0,
-    unjustifiedAbsences: 0,
-    pendingDocuments: 0,
-    unreadMessages: 0,
-  });
+  const [timetable, setTimetable] = useState<TimetableEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // Mock news from ISSAT website
+  const [news] = useState<NewsItem[]>([
+    { title: "Inscription au Semestre 2 - Année Universitaire 2024/2025", link: "https://issatkr.rnu.tn/fra/home", date: "2024-12-14" },
+    { title: "Calendrier des examens de fin de semestre", link: "https://issatkr.rnu.tn/fra/home", date: "2024-12-10" },
+    { title: "Journée d'intégration des nouveaux étudiants", link: "https://issatkr.rnu.tn/fra/home", date: "2024-12-05" },
+    { title: "Conférence: Intelligence Artificielle et Innovation", link: "https://issatkr.rnu.tn/fra/home", date: "2024-12-01" },
+  ]);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const [absencesRes, documentsRes, messagesRes] = await Promise.all([
-          api.get('/absences/student'),
-          api.get('/documents/student'),
-          api.get('/messages/student'),
-        ]);
-
-        const absences = absencesRes.data;
-        const documents = documentsRes.data;
-        const messages = messagesRes.data;
-
-        setStats({
-          totalAbsences: absences.length,
-          unjustifiedAbsences: absences.filter((a: any) => !a.justified).length,
-          pendingDocuments: documents.filter((d: any) => d.status === 'pending').length,
-          unreadMessages: messages.filter((m: any) => !m.readBy?.some((r: any) => r.student === profile?._id)).length,
-        });
-      } catch (error) {
-        console.error('Failed to fetch stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
+    fetchTimetable();
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
   }, [profile]);
 
-  const getAbsenceStatus = () => {
-    if (stats.unjustifiedAbsences >= 4) return { status: 'danger', message: 'Risque d\'élimination!' };
-    if (stats.unjustifiedAbsences >= 3) return { status: 'warning', message: 'Attention requise' };
-    return { status: 'safe', message: 'Situation normale' };
+  const fetchTimetable = async () => {
+    try {
+      const response = await api.get('/timetable/student');
+      setTimetable(response.data);
+    } catch (error) {
+      console.error('Failed to fetch timetable:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const absenceStatus = getAbsenceStatus();
+  const today = DAYS_MAP[currentTime.getDay()];
+  const todayClasses = timetable.filter(t => t.dayOfWeek === today)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  const quickActions = [
-    { label: 'Justifier une absence', href: '/student/absences', icon: Calendar, color: 'navy' },
-    { label: 'Demander un document', href: '/student/documents', icon: FileText, color: 'navy' },
-    { label: 'Consulter mes résultats', href: '/student/results', icon: Award, color: 'red' },
-    { label: 'Poser une question', href: '/student/ai-assistant', icon: MessageSquare, color: 'navy' },
-  ];
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'Cours': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+      case 'TD': return 'bg-violet-500/20 text-violet-300 border-violet-500/30';
+      case 'TP': return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+    }
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-issat-navy border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-issat-navy to-issat-navyLight rounded-2xl p-8 text-white">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">
-              Bienvenue, {profile?.firstName}!
-            </h1>
-            <p className="text-white/80">
-              {profile?.filiere} - {profile?.level} {profile?.group && `| Groupe ${profile.group}`}
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0">
-            <div className="inline-flex items-center px-4 py-2 bg-white/10 rounded-lg backdrop-blur-sm">
-              <Clock className="w-5 h-5 mr-2" />
-              <span className="text-sm">
-                {new Date().toLocaleDateString('fr-FR', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </span>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen relative">
+      {/* Animated background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Alert Banner (if needed) */}
-      {stats.unjustifiedAbsences >= 3 && (
-        <div className={`rounded-xl p-4 flex items-start space-x-4 ${
-          absenceStatus.status === 'danger' 
-            ? 'bg-issat-red/10 dark:bg-red-900/30 border border-issat-red/20 dark:border-red-800' 
-            : 'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800'
-        }`}>
-          <div className={`p-2 rounded-lg ${
-            absenceStatus.status === 'danger' ? 'bg-issat-red/20 dark:bg-red-800' : 'bg-amber-100 dark:bg-amber-800'
-          }`}>
-            <AlertCircle className={`w-6 h-6 ${
-              absenceStatus.status === 'danger' ? 'text-issat-red dark:text-red-400' : 'text-amber-600 dark:text-amber-400'
-            }`} />
-          </div>
-          <div className="flex-1">
-            <h3 className={`font-semibold ${
-              absenceStatus.status === 'danger' ? 'text-issat-red dark:text-red-400' : 'text-amber-800 dark:text-amber-300'
-            }`}>
-              {absenceStatus.status === 'danger' 
-                ? '⚠️ Risque d\'élimination' 
-                : '⚠️ Avertissement'}
-            </h3>
-            <p className={`text-sm mt-1 ${
-              absenceStatus.status === 'danger' ? 'text-issat-red/80 dark:text-red-300' : 'text-amber-700 dark:text-amber-400'
-            }`}>
-              Vous avez {stats.unjustifiedAbsences} absence(s) non justifiée(s). 
-              {absenceStatus.status === 'danger' 
-                ? ' Veuillez régulariser votre situation immédiatement.'
-                : ' Pensez à justifier vos absences.'}
-            </p>
-            <Link 
-              to="/student/absences"
-              className={`inline-flex items-center mt-3 text-sm font-medium ${
-                absenceStatus.status === 'danger' ? 'text-issat-red dark:text-red-400' : 'text-amber-700 dark:text-amber-400'
-              } hover:underline`}
-            >
-              Gérer mes absences <ArrowRight className="w-4 h-4 ml-1" />
-            </Link>
-          </div>
-        </div>
-      )}
+      <div className="relative z-10 space-y-8 p-2">
+        {/* Hero Section with Profile */}
+        <div className="relative overflow-hidden rounded-3xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-violet-500/10 backdrop-blur-xl"></div>
+          <div className="absolute inset-0 border border-white/10 rounded-3xl"></div>
+          
+          <div className="relative p-8">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              {/* Profile Picture */}
+              <div className="relative">
+                <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-white/20 shadow-2xl shadow-cyan-500/20">
+                  {profile?.picture ? (
+                    <img src={profile.picture} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center">
+                      <span className="text-4xl font-bold text-white">
+                        {profile?.firstName?.charAt(0)}{profile?.lastName?.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full border-4 border-slate-900 flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                </div>
+              </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 transition-colors">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-issat-navy/10 dark:bg-issat-navy/20 rounded-xl">
-              <Calendar className="w-6 h-6 text-issat-navy dark:text-blue-400" />
-            </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-              absenceStatus.status === 'safe' ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400' :
-              absenceStatus.status === 'warning' ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400' :
-              'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400'
-            }`}>
-              {absenceStatus.message}
-            </span>
-          </div>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">{stats.totalAbsences}</p>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Absences totales</p>
-          <div className="mt-3 flex items-center text-sm">
-            <span className={`font-medium ${
-              stats.unjustifiedAbsences > 0 ? 'text-issat-red dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
-            }`}>
-              {stats.unjustifiedAbsences} non justifiée(s)
-            </span>
-          </div>
-        </div>
+              {/* Welcome Text */}
+              <div className="text-center md:text-left flex-1">
+                <p className="text-cyan-400 text-sm font-medium mb-1">👋 Bienvenue</p>
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
+                  Bonjour, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400">{profile?.firstName}</span>
+                </h1>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-slate-300">
+                  <span className="px-3 py-1 bg-white/10 rounded-full text-sm backdrop-blur-sm border border-white/10">
+                    {profile?.filiere}
+                  </span>
+                  <span className="text-slate-500">—</span>
+                  <span className="px-3 py-1 bg-white/10 rounded-full text-sm backdrop-blur-sm border border-white/10">
+                    {profile?.level}
+                  </span>
+                  <span className="text-slate-500">|</span>
+                  <span className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-sm backdrop-blur-sm border border-cyan-500/30">
+                    Groupe {profile?.group}
+                  </span>
+                  <span className="text-slate-500">|</span>
+                  <span className="text-slate-400 text-sm">
+                    Année {new Date().getFullYear()}/{new Date().getFullYear() + 1}
+                  </span>
+                </div>
+              </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 transition-colors">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-issat-navy/10 dark:bg-issat-navy/20 rounded-xl">
-              <FileText className="w-6 h-6 text-issat-navy dark:text-blue-400" />
-            </div>
-            {stats.pendingDocuments > 0 && (
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400">
-                En attente
-              </span>
-            )}
-          </div>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">{stats.pendingDocuments}</p>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Demandes en cours</p>
-          <Link to="/student/documents" className="mt-3 inline-flex items-center text-sm text-issat-navy dark:text-blue-400 hover:underline">
-            Voir les demandes <ArrowRight className="w-4 h-4 ml-1" />
-          </Link>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 transition-colors">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-issat-red/10 dark:bg-red-900/30 rounded-xl">
-              <MessageSquare className="w-6 h-6 text-issat-red dark:text-red-400" />
-            </div>
-            {stats.unreadMessages > 0 && (
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-issat-red/10 dark:bg-red-900/50 text-issat-red dark:text-red-400">
-                Nouveau
-              </span>
-            )}
-          </div>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">{stats.unreadMessages}</p>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Messages non lus</p>
-          <Link to="/student/messages" className="mt-3 inline-flex items-center text-sm text-issat-navy dark:text-blue-400 hover:underline">
-            Lire les messages <ArrowRight className="w-4 h-4 ml-1" />
-          </Link>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 transition-colors">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
-              <Award className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              {/* Current Time */}
+              <div className="text-center md:text-right">
+                <div className="inline-block px-6 py-4 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10">
+                  <p className="text-3xl font-mono font-bold text-white">
+                    {currentTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  <p className="text-sm text-slate-400 mt-1">
+                    {currentTime.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">--</p>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Moyenne générale</p>
-          <Link to="/student/results" className="mt-3 inline-flex items-center text-sm text-issat-navy dark:text-blue-400 hover:underline">
-            Voir mes notes <ArrowRight className="w-4 h-4 ml-1" />
-          </Link>
         </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Actions rapides</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => {
-            const Icon = action.icon;
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Timetable - Takes 2 columns */}
+          <div className="lg:col-span-2">
+            <div className="relative overflow-hidden rounded-2xl h-full">
+              <div className="absolute inset-0 bg-white/5 backdrop-blur-xl"></div>
+              <div className="absolute inset-0 border border-white/10 rounded-2xl"></div>
+              
+              <div className="relative p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-cyan-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">Emploi du temps</h2>
+                      <p className="text-sm text-slate-400">Cours d'aujourd'hui - {today}</p>
+                    </div>
+                  </div>
+                  <Link 
+                    to="/student/timetable" 
+                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm text-white flex items-center gap-2 transition-all border border-white/10"
+                  >
+                    Voir tout <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                {todayClasses.length > 0 ? (
+                  <div className="space-y-3">
+                    {todayClasses.map((entry, index) => (
+                      <div 
+                        key={entry._id || index}
+                        className="group relative overflow-hidden rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-white/10"
+                      >
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 to-violet-500"></div>
+                        <div className="p-4 pl-5 flex items-center gap-4">
+                          <div className="text-center min-w-[80px]">
+                            <p className="text-lg font-bold text-white">{entry.startTime}</p>
+                            <p className="text-xs text-slate-500">{entry.endTime}</p>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-white group-hover:text-cyan-400 transition-colors">
+                              {entry.module?.name || 'Module'}
+                            </h3>
+                            <p className="text-sm text-slate-400">{entry.module?.code}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getTypeColor(entry.type)}`}>
+                              {entry.type}
+                            </span>
+                            <div className="flex items-center gap-1 text-slate-400">
+                              <MapPin className="w-4 h-4" />
+                              <span className="text-sm">{entry.room}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Calendar className="w-8 h-8 text-slate-500" />
+                    </div>
+                    <p className="text-slate-400">Pas de cours aujourd'hui</p>
+                    <p className="text-sm text-slate-500 mt-1">Profitez de votre journée! 🎉</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* News & À la une */}
+          <div className="space-y-6">
+            {/* À la une */}
+            <div className="relative overflow-hidden rounded-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-violet-500/10 backdrop-blur-xl"></div>
+              <div className="absolute inset-0 border border-white/10 rounded-2xl"></div>
+              
+              <div className="relative p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-violet-500 rounded-xl flex items-center justify-center">
+                    <Newspaper className="w-5 h-5 text-white" />
+                  </div>
+                  <h2 className="text-lg font-bold text-white">À la une</h2>
+                </div>
+
+                <div className="space-y-3">
+                  {news.slice(0, 3).map((item, index) => (
+                    <a
+                      key={index}
+                      href={item.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-medium text-white group-hover:text-cyan-400 transition-colors line-clamp-2">
+                            {item.title}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-1">{item.date}</p>
+                        </div>
+                        <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+
+                <a
+                  href="https://issatkr.rnu.tn/fra/home"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 block w-full py-3 text-center bg-white/10 hover:bg-white/20 rounded-xl text-sm text-white transition-all border border-white/10"
+                >
+                  Voir toutes les actualités
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="relative overflow-hidden rounded-2xl">
+              <div className="absolute inset-0 bg-white/5 backdrop-blur-xl"></div>
+              <div className="absolute inset-0 border border-white/10 rounded-2xl"></div>
+              
+              <div className="relative p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-violet-500/20 rounded-xl flex items-center justify-center">
+                    <BookOpen className="w-5 h-5 text-violet-400" />
+                  </div>
+                  <h2 className="text-lg font-bold text-white">Mon parcours</h2>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-4 bg-cyan-500/10 rounded-xl border border-cyan-500/20">
+                    <p className="text-2xl font-bold text-cyan-400">{profile?.filiere?.slice(0, 3) || '--'}</p>
+                    <p className="text-xs text-slate-400">Filière</p>
+                  </div>
+                  <div className="p-4 bg-violet-500/10 rounded-xl border border-violet-500/20">
+                    <p className="text-2xl font-bold text-violet-400">{profile?.level || '--'}</p>
+                    <p className="text-xs text-slate-400">Niveau</p>
+                  </div>
+                  <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                    <p className="text-2xl font-bold text-amber-400">{profile?.group || '--'}</p>
+                    <p className="text-xs text-slate-400">Groupe</p>
+                  </div>
+                  <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                    <p className="text-2xl font-bold text-emerald-400">S1</p>
+                    <p className="text-xs text-slate-400">Semestre</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Links */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: 'Absences', icon: Calendar, href: '/student/absences', color: 'from-red-500 to-orange-500' },
+            { label: 'Documents', icon: BookOpen, href: '/student/documents', color: 'from-cyan-500 to-blue-500' },
+            { label: 'Messages', icon: Bell, href: '/student/messages', color: 'from-violet-500 to-purple-500' },
+            { label: 'Assistant IA', icon: User, href: '/student/ai-assistant', color: 'from-emerald-500 to-teal-500' },
+          ].map((item, index) => {
+            const Icon = item.icon;
             return (
               <Link
                 key={index}
-                to={action.href}
-                className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md hover:border-gray-200 dark:hover:border-slate-600 transition-all group"
+                to={item.href}
+                className="group relative overflow-hidden rounded-2xl"
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                  action.color === 'red' ? 'bg-issat-red/10 dark:bg-red-900/30' : 'bg-issat-navy/10 dark:bg-issat-navy/20'
-                } group-hover:scale-110 transition-transform`}>
-                  <Icon className={`w-6 h-6 ${
-                    action.color === 'red' ? 'text-issat-red dark:text-red-400' : 'text-issat-navy dark:text-blue-400'
-                  }`} />
+                <div className="absolute inset-0 bg-white/5 backdrop-blur-xl group-hover:bg-white/10 transition-all"></div>
+                <div className="absolute inset-0 border border-white/10 rounded-2xl group-hover:border-white/20 transition-all"></div>
+                <div className="relative p-5 flex flex-col items-center text-center">
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-white">{item.label}</span>
                 </div>
-                <p className="font-medium text-gray-800 dark:text-white text-sm">{action.label}</p>
               </Link>
             );
           })}
-        </div>
-      </div>
-
-      {/* Recent Activity Placeholder */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 transition-colors">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Dernières actualités</h2>
-            <Link to="/student/info-notes" className="text-sm text-issat-navy dark:text-blue-400 hover:underline flex items-center">
-              Voir tout <ArrowRight className="w-4 h-4 ml-1" />
-            </Link>
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-              <div className="p-2 bg-issat-navy/10 dark:bg-issat-navy/20 rounded-lg">
-                <Bell className="w-5 h-5 text-issat-navy dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-800 dark:text-white text-sm">Bienvenue sur la plateforme!</p>
-                <p className="text-gray-500 dark:text-slate-400 text-xs mt-1">Consultez les notes d'information pour les dernières actualités.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 transition-colors">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Mon groupe</h2>
-            <Link to="/student/my-group" className="text-sm text-issat-navy dark:text-blue-400 hover:underline flex items-center">
-              Voir détails <ArrowRight className="w-4 h-4 ml-1" />
-            </Link>
-          </div>
-          <div className="p-4 bg-gradient-to-r from-issat-navy/5 to-issat-red/5 dark:from-issat-navy/20 dark:to-red-900/20 rounded-lg">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-issat-navy dark:text-blue-400">{profile?.filiere || '--'}</p>
-                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Filière</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-issat-navy dark:text-blue-400">{profile?.level || '--'}</p>
-                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Niveau</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-issat-red dark:text-red-400">{profile?.group || '--'}</p>
-                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Groupe</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

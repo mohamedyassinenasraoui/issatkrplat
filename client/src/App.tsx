@@ -19,6 +19,7 @@ import MyGroup from './pages/student/MyGroup';
 import AbsencesBlog from './pages/student/AbsencesBlog';
 import MyProfile from './pages/student/MyProfile';
 import StudentClassHub from './pages/student/StudentClassHub';
+import StudentTimetable from './pages/student/StudentTimetable';
 // Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminStudents from './pages/admin/AdminStudents';
@@ -30,6 +31,7 @@ import AdminInfoNotes from './pages/admin/AdminInfoNotes';
 import AdminMessages from './pages/admin/AdminMessages';
 import AdminSuggestions from './pages/admin/AdminSuggestions';
 import AdminResults from './pages/admin/AdminResults';
+import AdminTimetable from './pages/admin/AdminTimetable';
 // Teacher pages
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import TeacherTimetable from './pages/teacher/TeacherTimetable';
@@ -75,6 +77,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="absences-blog" element={<AbsencesBlog />} />
                 <Route path="profile" element={<MyProfile />} />
                 <Route path="classhub" element={<StudentClassHub />} />
+                <Route path="timetable" element={<StudentTimetable />} />
               </Routes>
             </Layout>
           </ProtectedRoute>
@@ -117,6 +120,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="messages" element={<AdminMessages />} />
                 <Route path="suggestions" element={<AdminSuggestions />} />
                 <Route path="results" element={<AdminResults />} />
+                <Route path="timetable" element={<AdminTimetable />} />
               </Routes>
             </Layout>
           </ProtectedRoute>

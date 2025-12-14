@@ -4,6 +4,8 @@ import Module from '../models/Module.js';
 import Absence from '../models/Absence.js';
 import DocumentRequest from '../models/DocumentRequest.js';
 import Notification from '../models/Notification.js';
+import Timetable from '../models/Timetable.js';
+import TeacherProfile from '../models/TeacherProfile.js';
 
 // Get all students
 export const getStudents = async (req, res) => {
@@ -216,3 +218,115 @@ export const getDashboardStats = async (req, res) => {
   }
 };
 
+// ========== TIMETABLE MANAGEMENT ==========
+
+// Get all timetable entries
+export const getTimetable = async (req, res) => {
+  try {
+    const timetable = await Timetable.find()
+      .populate('module', 'name code')
+      .populate('teacher', 'firstName lastName')
+      .sort({ dayOfWeek: 1, startTime: 1 });
+    res.json(timetable);
+  } catch (error) {
+    console.error('Get timetable error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Create timetable entry
+export const createTimetableEntry = async (req, res) => {
+  try {
+    const { module, filiere, level, group, dayOfWeek, startTime, endTime, room, type, teacher } = req.body;
+
+    const entry = new Timetable({
+      module,
+      filiere,
+      level,
+      group: group || '',
+      dayOfWeek,
+      startTime,
+      endTime,
+      room,
+      type,
+      teacher: teacher || null,
+    });
+
+    await entry.save();
+
+    const populated = await Timetable.findById(entry._id)
+      .populate('module', 'name code')
+      .populate('teacher', 'firstName lastName');
+
+    res.status(201).json(populated);
+  } catch (error) {
+    console.error('Create timetable entry error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update timetable entry
+export const updateTimetableEntry = async (req, res) => {
+  try {
+    const { entryId } = req.params;
+    const entry = await Timetable.findByIdAndUpdate(
+      entryId,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    ).populate('module', 'name code').populate('teacher', 'firstName lastName');
+
+    if (!entry) {
+      return res.status(404).json({ message: 'Timetable entry not found' });
+    }
+
+    res.json(entry);
+  } catch (error) {
+    console.error('Update timetable entry error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Delete timetable entry
+export const deleteTimetableEntry = async (req, res) => {
+  try {
+    const { entryId } = req.params;
+    const entry = await Timetable.findByIdAndDelete(entryId);
+
+    if (!entry) {
+      return res.status(404).json({ message: 'Timetable entry not found' });
+    }
+
+    res.json({ message: 'Timetable entry deleted successfully' });
+  } catch (error) {
+    console.error('Delete timetable entry error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get student timetable based on their filiere, level, and group
+export const getStudentTimetable = async (req, res) => {
+  try {
+    const { filiere, level, group } = req.query;
+
+    const query = {};
+    if (filiere) query.filiere = filiere;
+    if (level) query.level = level;
+    if (group) {
+      query.$or = [
+        { group: group },
+        { group: '' },
+        { group: { $exists: false } },
+      ];
+    }
+
+    const timetable = await Timetable.find(query)
+      .populate('module', 'name code')
+      .populate('teacher', 'firstName lastName')
+      .sort({ dayOfWeek: 1, startTime: 1 });
+
+    res.json(timetable);
+  } catch (error) {
+    console.error('Get student timetable error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

@@ -4,7 +4,7 @@ const timetableEntrySchema = new mongoose.Schema({
   teacher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'TeacherProfile',
-    required: true,
+    required: false, // Made optional
   },
   module: {
     type: mongoose.Schema.Types.ObjectId,
@@ -18,7 +18,7 @@ const timetableEntrySchema = new mongoose.Schema({
   },
   level: {
     type: String,
-    enum: ['L1', 'L2', 'L3'],
+    enum: ['L1', 'L2', 'L3', 'M1', 'M2'],
     required: true,
   },
   group: {
@@ -50,4 +50,3 @@ const timetableEntrySchema = new mongoose.Schema({
 }, { timestamps: true });
 
 export default mongoose.model('Timetable', timetableEntrySchema);
-

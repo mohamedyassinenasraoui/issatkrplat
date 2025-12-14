@@ -27,6 +27,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const studentNavItems = [
     { path: '/student/dashboard', label: 'Tableau de bord', icon: Home },
+    { path: '/student/timetable', label: 'Emploi du temps', icon: Clock },
     { path: '/student/classhub', label: 'ClassHub', icon: MessagesSquare },
     { path: '/student/absences', label: 'Absences', icon: Calendar },
     { path: '/student/documents', label: 'Documents', icon: FileText },
@@ -44,6 +45,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/admin/dashboard', label: 'Tableau de bord', icon: Home },
     { path: '/admin/students', label: 'Étudiants', icon: Users },
     { path: '/admin/teachers', label: 'Enseignants', icon: GraduationCap },
+    { path: '/admin/timetable', label: 'Emploi du temps', icon: Clock },
     { path: '/admin/absences', label: 'Absences', icon: Calendar },
     { path: '/admin/documents', label: 'Documents', icon: FileText },
     { path: '/admin/info-notes', label: 'Notes d\'info', icon: Bell },

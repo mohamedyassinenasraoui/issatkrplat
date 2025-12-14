@@ -10,6 +10,10 @@ import {
   updateModule,
   deleteModule,
   getDashboardStats,
+  getTimetable,
+  createTimetableEntry,
+  updateTimetableEntry,
+  deleteTimetableEntry,
 } from '../controllers/adminController.js';
 import { authMiddleware } from '../middlewares/auth.js';
 import { requireRole } from '../middlewares/role.js';
@@ -32,8 +36,13 @@ router.post('/modules', requireRole('admin'), createModule);
 router.put('/modules/:moduleId', requireRole('admin'), updateModule);
 router.delete('/modules/:moduleId', requireRole('admin'), deleteModule);
 
+// Timetable management
+router.get('/timetable', requireRole('admin'), getTimetable);
+router.post('/timetable', requireRole('admin'), createTimetableEntry);
+router.put('/timetable/:entryId', requireRole('admin'), updateTimetableEntry);
+router.delete('/timetable/:entryId', requireRole('admin'), deleteTimetableEntry);
+
 // Dashboard stats
 router.get('/dashboard/stats', requireRole('admin'), getDashboardStats);
 
 export default router;
-
