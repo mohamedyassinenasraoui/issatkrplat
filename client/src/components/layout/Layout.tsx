@@ -263,7 +263,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Footer */}
             <footer className="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 py-4 px-4 lg:px-8">
               <p className="text-center text-sm text-gray-500 dark:text-slate-400">
-                © 2024 ISSAT Kairouan - Institut Supérieur des Sciences Appliquées et de Technologie
+                © 2025 ISSAT Kairouan - Institut Supérieur des Sciences Appliquées et de Technologie
               </p>
             </footer>
           </div>
@@ -437,7 +437,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Footer */}
             <footer className="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 py-4 px-4 lg:px-8">
               <p className="text-center text-sm text-gray-500 dark:text-slate-400">
-                © 2024 ISSAT Kairouan - Institut Supérieur des Sciences Appliquées et de Technologie
+                © 2025 ISSAT Kairouan - Institut Supérieur des Sciences Appliquées et de Technologie
               </p>
             </footer>
           </div>
@@ -563,7 +563,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <footer className="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 py-6 mt-auto transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-gray-500 dark:text-slate-400">
-            © 2024 ISSAT Kairouan - Institut Supérieur des Sciences Appliquées et de Technologie
+            © 2025 ISSAT Kairouan - Institut Supérieur des Sciences Appliquées et de Technologie
           </p>
         </div>
       </footer>

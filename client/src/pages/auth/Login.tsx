@@ -185,7 +185,7 @@ const Login: React.FC = () => {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-400 dark:text-slate-500 mt-6">
-          © 2024 ISSAT Kairouan - Tous droits réservés
+          © 2025 ISSAT Kairouan - Tous droits réservés
         </p>
       </div>
     </div>
