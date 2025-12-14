@@ -100,7 +100,7 @@ const TeacherDashboard: React.FC = () => {
                 {/* Logo */}
                 <div className="relative">
                   <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center overflow-hidden shadow-2xl shadow-emerald-500/20">
-                    <img src="/images/logo.svg" alt="ISSAT Logo" className="w-14 h-14" />
+                    <img src="/images/logoissatkr.png" alt="ISSAT Logo" className="w-14 h-14 object-contain" />
                   </div>
                 </div>
                 

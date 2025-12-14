@@ -64,9 +64,9 @@ const Login: React.FC = () => {
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-white dark:bg-slate-800 rounded-2xl shadow-lg mb-6">
             <img 
-              src="/images/logo.svg" 
+              src="/images/logoissatkr.png" 
               alt="ISSAT Kairouan" 
-              className="w-14 h-14 object-contain"
+              className="w-16 h-16 object-contain"
             />
           </div>
           <h1 className="text-2xl font-bold text-issat-navy dark:text-white mb-2">ISSAT Kairouan</h1>

@@ -1,66 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
-  <!-- Background circle -->
-  <circle cx="100" cy="100" r="95" fill="white" stroke="#1E3A5F" stroke-width="4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 320" width="300" height="320">
+  <defs>
+    <style>
+      .navy { fill: #1E3A5F; }
+      .red { fill: #C41E3A; }
+      .dark-red { fill: #A01830; }
+    </style>
+  </defs>
   
-  <!-- Inner decorative circle -->
-  <circle cx="100" cy="100" r="85" fill="none" stroke="#1E3A5F" stroke-width="1" stroke-dasharray="10,5"/>
-  
-  <!-- Gear teeth (representing technology) -->
-  <g fill="#1E3A5F">
-    <rect x="155" y="55" width="15" height="12" rx="2" transform="rotate(15, 162, 61)"/>
-    <rect x="165" y="80" width="15" height="12" rx="2" transform="rotate(30, 172, 86)"/>
-    <rect x="168" y="108" width="15" height="12" rx="2" transform="rotate(45, 175, 114)"/>
-    <rect x="160" y="135" width="15" height="12" rx="2" transform="rotate(60, 167, 141)"/>
+  <!-- Circuit board lines (left side) -->
+  <g class="navy" stroke="#1E3A5F" stroke-width="3" fill="none">
+    <path d="M35 100 L55 100 L55 75 L75 75"/>
+    <path d="M25 125 L45 125 L45 100"/>
+    <path d="M35 150 L55 150 L55 175 L75 175"/>
+    <path d="M25 175 L45 175"/>
+    <path d="M50 200 L70 200 L70 185"/>
+  </g>
+  <!-- Circuit nodes -->
+  <g class="navy">
+    <circle cx="75" cy="75" r="6"/>
+    <circle cx="45" cy="100" r="4"/>
+    <circle cx="55" cy="125" r="5"/>
+    <circle cx="75" cy="175" r="6"/>
+    <circle cx="70" cy="185" r="4"/>
   </g>
   
-  <!-- Circuit lines (representing engineering) -->
-  <g stroke="#1E3A5F" stroke-width="2.5" fill="none">
-    <path d="M20 80 L35 80 L35 65 L55 65"/>
-    <path d="M20 100 L40 100"/>
-    <path d="M20 120 L35 120 L35 135 L55 135"/>
-  </g>
-  <g fill="#1E3A5F">
-    <circle cx="55" cy="65" r="5"/>
-    <circle cx="40" cy="100" r="5"/>
-    <circle cx="55" cy="135" r="5"/>
+  <!-- Main arch connecting both sides -->
+  <path d="M60 70 Q150 5 240 70" stroke="#1E3A5F" stroke-width="4" fill="none"/>
+  
+  <!-- Gear (right side) -->
+  <g class="navy">
+    <!-- Gear teeth -->
+    <rect x="225" y="65" width="22" height="14" rx="2" transform="rotate(15, 236, 72)"/>
+    <rect x="240" y="90" width="22" height="14" rx="2" transform="rotate(35, 251, 97)"/>
+    <rect x="248" y="120" width="22" height="14" rx="2" transform="rotate(55, 259, 127)"/>
+    <rect x="245" y="152" width="22" height="14" rx="2" transform="rotate(75, 256, 159)"/>
+    <rect x="235" y="182" width="22" height="14" rx="2" transform="rotate(95, 246, 189)"/>
   </g>
   
-  <!-- Mosque/Kairouan heritage element -->
-  <g fill="#C41E3A">
-    <!-- Main dome -->
-    <ellipse cx="100" cy="90" rx="35" ry="28"/>
+  <!-- Mosque/Kairouan Heritage -->
+  <g class="red">
+    <!-- Left Minaret -->
+    <rect x="85" y="110" width="18" height="90" rx="1"/>
+    <polygon points="94,110 80,85 108,85"/>
+    <polygon points="94,85 88,70 94,60 100,70"/>
+    <!-- Minaret crescent -->
+    <path d="M94 55 L96 48 L94 45 L92 48 Z"/>
     
-    <!-- Crescent on dome -->
-    <path d="M100 60 L103 52 L100 48 L97 52 Z" fill="#C41E3A"/>
+    <!-- Main Dome -->
+    <ellipse cx="150" cy="130" rx="45" ry="38"/>
+    <!-- Dome top ornament -->
+    <polygon points="150,90 145,80 150,70 155,80"/>
+    <!-- Dome crescent -->
+    <path d="M150 65 L153 55 L150 50 L147 55 Z"/>
     
-    <!-- Left minaret -->
-    <rect x="52" y="82" width="14" height="58" rx="1"/>
-    <path d="M59 82 L50 65 L68 65 Z"/>
-    <path d="M59 65 L56 55 L59 50 L62 55 Z"/>
-    
-    <!-- Right minaret -->
-    <rect x="134" y="82" width="14" height="58" rx="1"/>
-    <path d="M141 82 L132 65 L150 65 Z"/>
-    <path d="M141 65 L138 55 L141 50 L144 55 Z"/>
+    <!-- Right Minaret -->
+    <rect x="197" y="110" width="18" height="90" rx="1"/>
+    <polygon points="206,110 192,85 220,85"/>
+    <polygon points="206,85 200,70 206,60 212,70"/>
+    <!-- Minaret crescent -->
+    <path d="M206 55 L208 48 L206 45 L204 48 Z"/>
     
     <!-- Base/Wall -->
-    <rect x="45" y="135" width="110" height="22" rx="2"/>
+    <rect x="70" y="195" width="160" height="28" rx="2"/>
     
-    <!-- Arches in wall -->
-    <g fill="#A01030">
-      <rect x="52" y="138" width="10" height="14" rx="5"/>
-      <rect x="68" y="138" width="10" height="14" rx="5"/>
-      <rect x="84" y="138" width="10" height="14" rx="5"/>
-      <rect x="100" y="138" width="10" height="14" rx="5"/>
-      <rect x="116" y="138" width="10" height="14" rx="5"/>
-      <rect x="132" y="138" width="10" height="14" rx="5"/>
-    </g>
+    <!-- Ground line -->
+    <rect x="60" y="220" width="180" height="5" rx="1"/>
   </g>
   
-  <!-- Connecting arch (unity of tradition and technology) -->
-  <path d="M45 50 Q100 15 155 50" stroke="#1E3A5F" stroke-width="3" fill="none"/>
+  <!-- Arches in wall -->
+  <g class="dark-red">
+    <rect x="80" y="198" width="12" height="18" rx="6"/>
+    <rect x="100" y="198" width="12" height="18" rx="6"/>
+    <rect x="120" y="198" width="12" height="18" rx="6"/>
+    <rect x="140" y="198" width="12" height="18" rx="6"/>
+    <rect x="160" y="198" width="12" height="18" rx="6"/>
+    <rect x="180" y="198" width="12" height="18" rx="6"/>
+    <rect x="200" y="198" width="12" height="18" rx="6"/>
+  </g>
   
-  <!-- ISSAT text area indicator (optional decorative) -->
-  <ellipse cx="100" cy="175" rx="45" ry="10" fill="#1E3A5F" opacity="0.1"/>
+  <!-- ISSATKR Text -->
+  <text x="150" y="260" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="36" font-weight="bold" letter-spacing="2">
+    <tspan class="navy">ISSAT</tspan><tspan class="red">KR</tspan>
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="150" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="11" class="navy" font-style="italic">
+    Institut Supérieur des Sciences Appliquées
+  </text>
+  <text x="150" y="300" text-anchor="middle" font-family="Georgia, serif" font-size="11" class="navy" font-style="italic">
+    et de Technologie de Kairouan
+  </text>
 </svg>

@@ -95,7 +95,7 @@ const AdminDashboard: React.FC = () => {
                 {/* Logo */}
                 <div className="relative">
                   <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center overflow-hidden shadow-2xl">
-                    <img src="/images/logo.svg" alt="ISSAT Logo" className="w-14 h-14" />
+                    <img src="/images/logoissatkr.png" alt="ISSAT Logo" className="w-14 h-14 object-contain" />
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-4 border-[#0a1628] flex items-center justify-center">
                     <CheckCircle className="w-3 h-3 text-white" />
