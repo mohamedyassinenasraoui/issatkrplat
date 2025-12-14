@@ -1,6 +1,6 @@
 # 🚀 Guide de Déploiement Étape par Étape - ISSAT Kairouan Platform
 
-Ce guide vous explique **exactement** comment déployer la plateforme ISSAT Kairouan sur Render gratuitement.
+Ce guide vous explique **exactement** comment déployer la plateforme ISSAT Kairouan sur Render gratuitement avec **deux services séparés** (Backend et Frontend).
 
 ---
 
@@ -76,9 +76,9 @@ Avant de commencer, vous devez avoir :
 
 ---
 
-## ÉTAPE 3 : Déployer l'Application sur Render
+## ÉTAPE 3 : Déployer le Backend (API Server)
 
-### 3.1 Créer un Nouveau Web Service
+### 3.1 Créer un Nouveau Web Service pour le Backend
 
 1. Dans le dashboard Render, cliquez sur **"New +"** (en haut à droite)
 2. Sélectionnez **"Web Service"**
@@ -90,28 +90,28 @@ Avant de commencer, vous devez avoir :
 3. Dans la liste des dépôts, cherchez et sélectionnez : **`issatkrplat`**
 4. Cliquez sur **"Connect"**
 
-### 3.3 Configurer le Service
+### 3.3 Configurer le Service Backend
 
 Remplissez les champs suivants :
 
 **Basic Settings:**
-- **Name**: `issatkr-platform` (ou un nom de votre choix)
+- **Name**: `issatkr-backend` (ou `issatkr-api`)
 - **Region**: Choisissez la région la plus proche (ex: `Frankfurt` pour l'Europe)
 - **Branch**: `main` (ou `master` selon votre dépôt)
-- **Root Directory**: (laissez vide)
+- **Root Directory**: `server` ⚠️ **IMPORTANT : Spécifiez le dossier server**
 
 **Build & Deploy:**
 - **Environment**: `Node`
 - **Build Command**: 
   ```bash
-  cd server && npm install && cd ../client && npm install && npm run build
+  npm install
   ```
 - **Start Command**: 
   ```bash
-  cd server && npm start
+  npm start
   ```
 
-### 3.4 Ajouter les Variables d'Environnement
+### 3.4 Ajouter les Variables d'Environnement pour le Backend
 
 Cliquez sur **"Advanced"** → **"Add Environment Variable"** et ajoutez :
 
@@ -120,7 +120,12 @@ Cliquez sur **"Advanced"** → **"Add Environment Variable"** et ajoutez :
 - **Value**: `production`
 - Cliquez sur **"Save"**
 
-#### Variable 2 : MONGODB_URI
+#### Variable 2 : PORT
+- **Key**: `PORT`
+- **Value**: (Laissez vide - Render définit automatiquement le PORT)
+- ⚠️ **Ne pas définir** - Render le gère automatiquement
+
+#### Variable 3 : MONGODB_URI
 - **Key**: `MONGODB_URI`
 - **Value**: Collez l'URI MongoDB que vous avez copiée à l'étape 1.5
   ```
@@ -128,7 +133,7 @@ Cliquez sur **"Advanced"** → **"Add Environment Variable"** et ajoutez :
   ```
 - Cliquez sur **"Save"**
 
-#### Variable 3 : JWT_SECRET
+#### Variable 4 : JWT_SECRET
 - **Key**: `JWT_SECRET`
 - **Value**: Générez une clé secrète sécurisée
   - Sur Windows (PowerShell) :
@@ -139,10 +144,17 @@ Cliquez sur **"Advanced"** → **"Add Environment Variable"** et ajoutez :
   - Copiez une chaîne de 128 caractères
 - Cliquez sur **"Save"**
 
-#### Variable 4 : OPENAI_API_KEY (Optionnel)
+#### Variable 5 : OPENAI_API_KEY (Optionnel)
 - **Key**: `OPENAI_API_KEY`
 - **Value**: Votre clé API OpenAI (si vous avez un compte)
 - ⚠️ Si vous n'avez pas de clé OpenAI, vous pouvez laisser cette variable vide ou ne pas l'ajouter
+- Cliquez sur **"Save"**
+
+#### Variable 6 : CORS_ORIGIN (Important pour le Frontend)
+- **Key**: `CORS_ORIGIN`
+- **Value**: L'URL de votre frontend Render (vous l'obtiendrez après le déploiement du frontend)
+  - Exemple : `https://issatkr-frontend.onrender.com`
+- ⚠️ **Note** : Vous pouvez d'abord déployer sans cette variable, puis l'ajouter après avoir déployé le frontend
 - Cliquez sur **"Save"**
 
 ### 3.5 Choisir le Plan
@@ -150,36 +162,130 @@ Cliquez sur **"Advanced"** → **"Add Environment Variable"** et ajoutez :
 - Sélectionnez **"Free"** (plan gratuit)
 - ⚠️ Note : Le plan gratuit s'arrête après 15 minutes d'inactivité
 
-### 3.6 Lancer le Déploiement
+### 3.6 Lancer le Déploiement du Backend
 
 1. Vérifiez que toutes les variables d'environnement sont ajoutées
 2. Cliquez sur **"Create Web Service"**
-3. ⏳ Attendez 5-10 minutes pendant que Render :
+3. ⏳ Attendez 3-5 minutes pendant que Render :
    - Clone votre dépôt
    - Installe les dépendances du serveur
-   - Installe les dépendances du client
-   - Build le frontend React
    - Démarre le serveur
-
-### 3.7 Vérifier le Déploiement
-
-1. Une fois le déploiement terminé, vous verrez :
-   - ✅ Status: **Live**
-   - 🌐 Votre URL : `https://issatkr-platform.onrender.com`
-2. Cliquez sur l'URL pour ouvrir votre application
-3. 🎉 Félicitations ! Votre application est en ligne !
+4. Une fois terminé, notez l'URL de votre backend : `https://issatkr-backend.onrender.com`
 
 ---
 
-## ÉTAPE 4 : Peupler la Base de Données (Optionnel)
+## ÉTAPE 4 : Déployer le Frontend (React App)
+
+### 4.1 Créer un Nouveau Web Service pour le Frontend
+
+1. Dans le dashboard Render, cliquez sur **"New +"** (en haut à droite)
+2. Sélectionnez **"Web Service"**
+
+### 4.2 Connecter le Dépôt GitHub
+
+1. Sélectionnez le même dépôt : **`issatkrplat`**
+2. Cliquez sur **"Connect"**
+
+### 4.3 Configurer le Service Frontend
+
+Remplissez les champs suivants :
+
+**Basic Settings:**
+- **Name**: `issatkr-frontend` (ou `issatkr-app`)
+- **Region**: Choisissez la **même région** que le backend
+- **Branch**: `main` (ou `master` selon votre dépôt)
+- **Root Directory**: `client` ⚠️ **IMPORTANT : Spécifiez le dossier client**
+
+**Build & Deploy:**
+- **Environment**: `Node`
+- **Build Command**: 
+  ```bash
+  npm install && npm run build
+  ```
+- **Start Command**: 
+  ```bash
+  npm run preview
+  ```
+  ⚠️ **OU** si vous préférez servir les fichiers statiques :
+  ```bash
+  npx serve -s dist -l 10000
+  ```
+
+### 4.4 Ajouter les Variables d'Environnement pour le Frontend
+
+Cliquez sur **"Advanced"** → **"Add Environment Variable"** et ajoutez :
+
+#### Variable 1 : VITE_API_URL
+- **Key**: `VITE_API_URL`
+- **Value**: L'URL de votre backend Render (de l'étape 3.6)
+  ```
+  https://issatkr-backend.onrender.com/api
+  ```
+- ⚠️ **IMPORTANT** : Remplacez `issatkr-backend` par le nom réel de votre service backend
+- Cliquez sur **"Save"**
+
+#### Variable 2 : NODE_ENV (Optionnel)
+- **Key**: `NODE_ENV`
+- **Value**: `production`
+- Cliquez sur **"Save"**
+
+### 4.5 Choisir le Plan
+
+- Sélectionnez **"Free"** (plan gratuit)
+
+### 4.6 Lancer le Déploiement du Frontend
+
+1. Vérifiez que la variable `VITE_API_URL` pointe vers votre backend
+2. Cliquez sur **"Create Web Service"**
+3. ⏳ Attendez 5-10 minutes pendant que Render :
+   - Clone votre dépôt
+   - Installe les dépendances du client
+   - Build le frontend React
+   - Démarre le serveur de preview
+4. Une fois terminé, notez l'URL de votre frontend : `https://issatkr-frontend.onrender.com`
+
+---
+
+## ÉTAPE 5 : Finaliser la Configuration
+
+### 5.1 Mettre à jour CORS dans le Backend
+
+1. Retournez dans votre service backend sur Render
+2. Allez dans **"Environment"**
+3. Mettez à jour la variable `CORS_ORIGIN` avec l'URL de votre frontend :
+   ```
+   https://issatkr-frontend.onrender.com
+   ```
+4. Cliquez sur **"Save Changes"**
+5. Un redéploiement automatique sera déclenché
+
+### 5.2 Vérifier les URLs
+
+- **Backend API** : `https://issatkr-backend.onrender.com`
+- **Frontend App** : `https://issatkr-frontend.onrender.com`
+- **Health Check** : `https://issatkr-backend.onrender.com/api/health`
+
+### 5.3 Tester l'Application
+
+1. Ouvrez l'URL du frontend dans votre navigateur
+2. Vérifiez que la page d'accueil se charge
+3. Testez la connexion à l'API (essayez de vous connecter)
+4. Vérifiez les logs dans Render si quelque chose ne fonctionne pas
+
+---
+
+## ÉTAPE 6 : Peupler la Base de Données (Optionnel)
 
 Pour avoir des données de test (utilisateurs, modules, etc.) :
 
-### Option A : Via le Script Seed (Recommandé)
+### Option A : Via le Script Seed Local
 
-1. Dans Render, allez dans votre service
-2. Cliquez sur **"Shell"** (si disponible) ou utilisez votre terminal local
-3. Exécutez :
+1. Créez un fichier `.env` local dans le dossier `server` :
+   ```env
+   MONGODB_URI=votre-uri-mongodb-atlas
+   JWT_SECRET=votre-jwt-secret
+   ```
+2. Exécutez le script seed :
    ```bash
    cd server
    npm run seed
@@ -206,33 +312,43 @@ Pour avoir des données de test (utilisateurs, modules, etc.) :
 
 ## 🔧 Dépannage
 
-### Le déploiement échoue
+### Le déploiement du backend échoue
 
 1. **Vérifiez les logs** dans Render → "Logs"
 2. **Erreur de build** :
-   - Vérifiez que toutes les dépendances sont dans `package.json`
-   - Vérifiez que les commandes de build sont correctes
+   - Vérifiez que le **Root Directory** est bien `server`
+   - Vérifiez que toutes les dépendances sont dans `server/package.json`
 3. **Erreur de connexion MongoDB** :
    - Vérifiez que l'URI MongoDB est correcte
    - Vérifiez que l'accès réseau dans MongoDB Atlas autorise `0.0.0.0/0`
    - Vérifiez que le nom d'utilisateur et mot de passe sont corrects
 
-### L'application ne démarre pas
+### Le déploiement du frontend échoue
 
-1. Vérifiez les logs dans Render
-2. Vérifiez que toutes les variables d'environnement sont définies
-3. Vérifiez que le PORT est bien utilisé (Render définit automatiquement `process.env.PORT`)
+1. **Vérifiez les logs** dans Render → "Logs"
+2. **Erreur de build** :
+   - Vérifiez que le **Root Directory** est bien `client`
+   - Vérifiez que toutes les dépendances sont dans `client/package.json`
+   - Vérifiez que `VITE_API_URL` est bien définie
+3. **Erreur TypeScript** :
+   - Les erreurs TypeScript peuvent être ignorées si le build Vite réussit
+   - Vérifiez que `tsconfig.json` a `"strict": false` pour éviter les erreurs strictes
 
-### Le frontend ne se charge pas
+### Le frontend ne peut pas se connecter au backend
 
-1. Vérifiez que le build du client s'est bien terminé
-2. Vérifiez que le dossier `client/dist` existe après le build
-3. Vérifiez les logs de build dans Render
+1. **Vérifiez que `VITE_API_URL`** pointe vers la bonne URL du backend
+2. **Vérifiez CORS** :
+   - Assurez-vous que `CORS_ORIGIN` dans le backend contient l'URL du frontend
+   - Vérifiez les logs du backend pour les erreurs CORS
+3. **Vérifiez que le backend est en ligne** :
+   - Testez l'endpoint `/api/health` du backend
+   - Vérifiez que le backend n'est pas en "sleeping" (plan gratuit)
 
 ### Erreur 404 sur les routes React
 
-1. Vérifiez que le serveur sert bien les fichiers statiques en production
-2. Vérifiez que la route `*` est bien configurée dans `server.js`
+1. Pour le frontend, assurez-vous que le serveur sert bien `index.html` pour toutes les routes
+2. Si vous utilisez `serve`, utilisez : `npx serve -s dist -l 10000`
+   - Le flag `-s` sert `index.html` pour toutes les routes
 
 ---
 
@@ -240,17 +356,18 @@ Pour avoir des données de test (utilisateurs, modules, etc.) :
 
 ### Plan Gratuit Render
 
-- ⏰ **Spinning down** : Le service s'arrête après 15 minutes d'inactivité
+- ⏰ **Spinning down** : Les services s'arrêtent après 15 minutes d'inactivité
 - 🐌 **Démarrage lent** : Le premier accès après un arrêt peut prendre 30-60 secondes
-- 💾 **Limites** : 512 MB RAM, 0.5 CPU
+- 💾 **Limites** : 512 MB RAM, 0.5 CPU par service
 - 📊 **Logs** : Conservés pendant 7 jours
+- 🔗 **Deux services** : Vous avez 2 services gratuits (parfait pour frontend + backend)
 
 ### Mises à Jour
 
 Pour mettre à jour l'application :
 1. Poussez vos modifications sur GitHub
 2. Render détectera automatiquement les changements
-3. Un nouveau déploiement sera déclenché automatiquement
+3. Un nouveau déploiement sera déclenché automatiquement pour chaque service
 4. Vous pouvez aussi cliquer sur **"Manual Deploy"** → **"Deploy latest commit"**
 
 ### Variables d'Environnement
@@ -262,21 +379,41 @@ Pour modifier les variables d'environnement :
 4. Cliquez sur **"Save Changes"**
 5. Un redéploiement automatique sera déclenché
 
+### URLs des Services
+
+Après le déploiement, vous aurez :
+- **Backend** : `https://issatkr-backend.onrender.com`
+- **Frontend** : `https://issatkr-frontend.onrender.com`
+
+⚠️ **Important** : Remplacez `issatkr-backend` et `issatkr-frontend` par les noms réels que vous avez donnés à vos services.
+
 ---
 
 ## 🎯 Checklist de Déploiement
 
 Avant de considérer le déploiement comme terminé, vérifiez :
 
+### Backend
 - [ ] MongoDB Atlas est configuré et accessible
 - [ ] Toutes les variables d'environnement sont définies dans Render
 - [ ] Le build se termine sans erreur
 - [ ] L'application démarre correctement (vérifiez les logs)
-- [ ] L'URL de l'application est accessible
-- [ ] Le frontend se charge correctement
-- [ ] Les routes API fonctionnent (`/api/health`)
+- [ ] L'URL du backend est accessible
+- [ ] L'endpoint `/api/health` fonctionne
 - [ ] La connexion à MongoDB fonctionne
+
+### Frontend
+- [ ] La variable `VITE_API_URL` pointe vers le backend
+- [ ] Le build se termine sans erreur
+- [ ] L'application démarre correctement (vérifiez les logs)
+- [ ] L'URL du frontend est accessible
+- [ ] Le frontend se charge correctement
+- [ ] Les routes React fonctionnent (pas d'erreur 404)
+
+### Configuration
+- [ ] CORS est configuré dans le backend avec l'URL du frontend
 - [ ] Vous pouvez vous connecter (si vous avez créé un utilisateur)
+- [ ] Les appels API fonctionnent depuis le frontend
 
 ---
 
@@ -284,30 +421,60 @@ Avant de considérer le déploiement comme terminé, vérifiez :
 
 Si vous rencontrez des problèmes :
 
-1. **Consultez les logs** dans Render Dashboard → Logs
+1. **Consultez les logs** dans Render Dashboard → Logs (pour chaque service)
 2. **Vérifiez la documentation** : https://render.com/docs
 3. **Vérifiez MongoDB Atlas** : https://docs.atlas.mongodb.com
 4. **Vérifiez les fichiers de configuration** :
-   - `render.yaml`
    - `server/server.js`
    - `client/src/services/api.ts`
+   - `client/vite.config.ts`
 
 ---
 
 ## ✅ Résultat Final
 
-Une fois tout configuré, votre application sera accessible sur :
-```
-https://issatkr-platform.onrender.com
-```
+Une fois tout configuré, vous aurez :
+
+- **Backend API** : `https://issatkr-backend.onrender.com`
+- **Frontend App** : `https://issatkr-frontend.onrender.com`
 
 Et vous pourrez :
-- ✅ Accéder à la page d'accueil
+- ✅ Accéder à la page d'accueil depuis le frontend
 - ✅ Vous connecter (si vous avez créé un utilisateur)
 - ✅ Utiliser toutes les fonctionnalités de la plateforme
 - ✅ Accéder depuis n'importe où dans le monde !
 
 ---
 
-**Bon déploiement ! 🚀**
+## 🔄 Architecture Déployée
 
+```
+┌─────────────────────────────────────┐
+│   Frontend (React + Vite)           │
+│   https://issatkr-frontend.onrender.com │
+│   - Sert les fichiers statiques     │
+│   - Appels API vers le backend      │
+└──────────────┬──────────────────────┘
+               │
+               │ HTTP Requests
+               │
+┌──────────────▼──────────────────────┐
+│   Backend (Node.js + Express)        │
+│   https://issatkr-backend.onrender.com │
+│   - API REST                         │
+│   - Authentification                 │
+│   - Logique métier                   │
+└──────────────┬──────────────────────┘
+               │
+               │ MongoDB Connection
+               │
+┌──────────────▼──────────────────────┐
+│   MongoDB Atlas (Cloud Database)     │
+│   - Stockage des données             │
+│   - Utilisateurs, modules, etc.      │
+└─────────────────────────────────────┘
+```
+
+---
+
+**Bon déploiement ! 🚀**

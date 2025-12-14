@@ -2,34 +2,49 @@ import axios from 'axios';
 
 // Determine API base URL based on how the app is accessed
 function getApiBaseUrl(): string {
-  // If running in dev with explicit API URL
+  // Priority 1: Use VITE_API_URL if defined (for production deployment with separate backend)
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
   
-  // In production, the server serves the frontend, so use relative path
-  if (import.meta.env.PROD) {
+  // Priority 2: In production build, check if we're on Render or similar
+  // If hostname contains 'onrender.com', we're on Render and need to use VITE_API_URL
+  const hostname = window.location.hostname;
+  if (import.meta.env.MODE === 'production' && hostname.includes('onrender.com')) {
+    // If VITE_API_URL is not set, this will fail - it should be set in Render
+    console.warn('⚠️ VITE_API_URL is not set. Please set it in Render environment variables.');
+    return '/api'; // Fallback, but this won't work on Render
+  }
+  
+  // Priority 3: In production but not on Render (local production build)
+  if (import.meta.env.MODE === 'production') {
     return '/api';
   }
   
-  // If accessing via localhost, use the proxy
-  const hostname = window.location.hostname;
+  // Priority 4: Development - use proxy for localhost
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return '/api';
   }
   
-  // If accessing via network IP, connect directly to backend on same IP
-  // Backend runs on port 5000
+  // Priority 5: Development - network IP access
   return `http://${hostname}:5000/api`;
 }
 
 // Get base URL for static files (uploads)
 function getUploadsBaseUrl(): string {
+  // If VITE_API_URL is set, extract the base URL (without /api)
+  if (import.meta.env.VITE_API_URL) {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    // Remove /api from the end if present
+    return apiUrl.replace(/\/api\/?$/, '');
+  }
+  
   // In production, use relative path
-  if (import.meta.env.PROD) {
+  if (import.meta.env.MODE === 'production') {
     return '';
   }
   
+  // Development
   const hostname = window.location.hostname;
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:5000';

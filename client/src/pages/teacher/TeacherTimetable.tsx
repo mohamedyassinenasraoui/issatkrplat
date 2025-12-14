@@ -98,7 +98,7 @@ const TeacherTimetable: React.FC = () => {
                 </div>
                 <div className="p-4 space-y-3">
                   {entries.length > 0 ? (
-                    entries.map((entry) => (
+                    entries.map((entry: TimetableEntry) => (
                       <div
                         key={entry._id}
                         className="p-4 bg-gray-50 dark:bg-slate-700 rounded-lg space-y-2"
