@@ -21,7 +21,7 @@ const Login: React.FC = () => {
       await login(email.trim(), password);
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       toast.success('Connexion réussie!');
-      navigate(user.role === 'admin' ? '/admin/dashboard' : '/student/dashboard');
+      navigate(user.role === 'admin' ? '/admin/dashboard' : user.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
       let errorMessage = 'Erreur de connexion';
@@ -55,23 +55,25 @@ const Login: React.FC = () => {
 
       {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-issat-navy/5 dark:bg-issat-navy/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-issat-red/5 dark:bg-issat-red/20 rounded-full blur-3xl"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#1E3A5F]/10 dark:bg-[#1E3A5F]/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#C41E3A]/10 dark:bg-[#C41E3A]/20 rounded-full blur-3xl"></div>
       </div>
       
       <div className="relative w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white dark:bg-slate-800 rounded-2xl shadow-lg mb-6">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-white dark:bg-slate-800 rounded-2xl shadow-lg mb-6 p-3 border border-gray-100 dark:border-slate-700">
             <img 
               src="/images/logoissatkr.png" 
               alt="ISSAT Kairouan" 
-              className="w-16 h-16 object-contain"
+              className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-2xl font-bold text-issat-navy dark:text-white mb-2">ISSAT Kairouan</h1>
+          <h1 className="text-2xl font-bold text-[#1E3A5F] dark:text-white mb-2">
+            ISSAT<span className="text-[#C41E3A]">KR</span>
+          </h1>
           <p className="text-gray-500 dark:text-slate-400 text-sm">
-            Institut Supérieur des Sciences Appliquées et de Technologie
+            Institut Supérieur des Sciences Appliquées et de Technologie de Kairouan
           </p>
         </div>
 
@@ -97,7 +99,7 @@ const Login: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-issat-navy/20 dark:focus:ring-slate-500/50 focus:border-issat-navy dark:focus:border-slate-500 transition-colors"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/20 dark:focus:ring-slate-500/50 focus:border-[#1E3A5F] dark:focus:border-slate-500 transition-colors"
                   placeholder="votre.email@issatkr.rnu.tn"
                 />
               </div>
@@ -117,7 +119,7 @@ const Login: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-issat-navy/20 dark:focus:ring-slate-500/50 focus:border-issat-navy dark:focus:border-slate-500 transition-colors"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/20 dark:focus:ring-slate-500/50 focus:border-[#1E3A5F] dark:focus:border-slate-500 transition-colors"
                   placeholder="••••••••"
                 />
               </div>
@@ -126,7 +128,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-issat-navy hover:bg-issat-navyLight text-white font-semibold rounded-xl shadow-lg shadow-issat-navy/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
+              className="w-full py-3 px-4 bg-[#1E3A5F] hover:bg-[#2B4C73] text-white font-semibold rounded-xl shadow-lg shadow-[#1E3A5F]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -146,16 +148,26 @@ const Login: React.FC = () => {
             <p className="text-center text-sm text-gray-500 dark:text-slate-400">
               Comptes de démonstration
             </p>
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="mt-3 grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => {
                   setEmail('admin@issat.tn');
                   setPassword('password123');
                 }}
-                className="px-3 py-2 text-xs font-medium text-issat-navy dark:text-slate-300 bg-issat-navy/5 dark:bg-slate-700 hover:bg-issat-navy/10 dark:hover:bg-slate-600 rounded-lg transition-colors"
+                className="px-3 py-2 text-xs font-medium text-[#1E3A5F] dark:text-blue-400 bg-[#1E3A5F]/5 dark:bg-[#1E3A5F]/20 hover:bg-[#1E3A5F]/10 dark:hover:bg-[#1E3A5F]/30 rounded-lg transition-colors"
               >
                 Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('teacher@issat.tn');
+                  setPassword('password123');
+                }}
+                className="px-3 py-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-lg transition-colors"
+              >
+                Enseignant
               </button>
               <button
                 type="button"
@@ -163,7 +175,7 @@ const Login: React.FC = () => {
                   setEmail('student1@issat.tn');
                   setPassword('password123');
                 }}
-                className="px-3 py-2 text-xs font-medium text-issat-red dark:text-red-400 bg-issat-red/5 dark:bg-red-900/20 hover:bg-issat-red/10 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                className="px-3 py-2 text-xs font-medium text-[#C41E3A] dark:text-red-400 bg-[#C41E3A]/5 dark:bg-[#C41E3A]/20 hover:bg-[#C41E3A]/10 dark:hover:bg-[#C41E3A]/30 rounded-lg transition-colors"
               >
                 Étudiant
               </button>
