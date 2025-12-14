@@ -90,7 +90,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               ISSAT<span className="text-[#C41E3A]">KR</span>
             </span>
             <span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">
-              {isStudent ? 'Espace Étudiant' : isTeacher ? 'Espace Enseignant' : 'Administration'}
+              {isStudent ? 'Espace Intranet' : isTeacher ? 'Espace Enseignant' : 'Administration'}
             </span>
           </div>
         )}

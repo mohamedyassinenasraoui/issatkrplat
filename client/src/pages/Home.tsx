@@ -318,7 +318,7 @@ const Home: React.FC = () => {
                   onClick={handleStudentAccess}
                   className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition font-medium text-sm border border-white/30"
                 >
-                  🔐 Espace Étudiant
+                  🔐 Espace Intranet
                 </button>
               </div>
 
@@ -352,7 +352,7 @@ const Home: React.FC = () => {
                       onClick={handleStudentAccess}
                       className="w-full px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition font-medium border border-white/30"
                     >
-                      🔐 Espace Étudiant
+                      🔐 Espace Intranet
                     </button>
                   </div>
                 </nav>
@@ -377,7 +377,7 @@ const Home: React.FC = () => {
                   onClick={handleStudentAccess}
                   className="px-6 py-3 bg-issat-red text-white rounded-lg hover:bg-issat-redLight transition font-medium shadow-lg"
                 >
-                  Espace Étudiant
+                  Espace Intranet
                 </button>
               </div>
               {/* Right: Video - Smaller and Adjusted */}
