@@ -40,7 +40,14 @@ const AdminTeachers: React.FC = () => {
     office: '',
   });
 
-  const filiereOptions = ['Informatique', 'Genie Civil', 'Genie Mecanique', 'Genie Electrique'];
+  const filiereOptions = [
+    'Ingénierie des Systèmes Informatiques',
+    'Électronique, Électrotechnique & Automatique',
+    'Génie Mécanique',
+    'Génie Énergétique',
+    'Master Data Science',
+    'Master Automatique & Informatique Industrielle'
+  ];
 
   useEffect(() => {
     fetchData();

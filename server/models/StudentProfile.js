@@ -30,7 +30,7 @@ const studentProfileSchema = new mongoose.Schema({
   },
   level: {
     type: String,
-    enum: ['L1', 'L2', 'L3'],
+    enum: ['L1', 'L2', 'L3', 'M1', 'M2'],
     required: true,
   },
   group: {

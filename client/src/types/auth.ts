@@ -14,7 +14,7 @@ export interface StudentProfile {
   lastName: string;
   studentId?: string;
   filiere: string;
-  level: 'L1' | 'L2' | 'L3';
+  level: 'L1' | 'L2' | 'L3' | 'M1' | 'M2';
   group?: string;
   picture?: string;
   username?: string;

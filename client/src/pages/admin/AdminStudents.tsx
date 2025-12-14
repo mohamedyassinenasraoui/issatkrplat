@@ -321,11 +321,12 @@ const AdminStudents: React.FC = () => {
                     className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/20 dark:focus:ring-blue-500/30"
                   >
                     <option value="">Sélectionner...</option>
-                    <option value="Licence Informatique">Licence Informatique</option>
-                    <option value="Licence Génie Civil">Licence Génie Civil</option>
-                    <option value="Licence Électronique">Licence Électronique</option>
-                    <option value="Master Informatique">Master Informatique</option>
-                    <option value="Master Génie Civil">Master Génie Civil</option>
+                    <option value="Ingénierie des Systèmes Informatiques">Ingénierie des Systèmes Informatiques (ISI)</option>
+                    <option value="Électronique, Électrotechnique & Automatique">Électronique, Électrotechnique & Automatique (EEA)</option>
+                    <option value="Génie Mécanique">Génie Mécanique</option>
+                    <option value="Génie Énergétique">Génie Énergétique</option>
+                    <option value="Master Data Science">Master Data Science</option>
+                    <option value="Master Automatique & Informatique Industrielle">Master Automatique & Informatique Industrielle</option>
                   </select>
                 </div>
                 <div>
