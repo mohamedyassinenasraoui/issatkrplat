@@ -20,6 +20,7 @@ import {
 } from '../controllers/teacherController.js';
 import { authMiddleware } from '../middlewares/auth.js';
 import { requireRole } from '../middlewares/role.js';
+import { upload } from '../utils/upload.js';
 
 const router = express.Router();
 
@@ -39,10 +40,10 @@ router.get('/classhub/students', requireRole('teacher'), getClassHubStudents);
 router.get('/absences', requireRole('teacher'), getTeacherAbsences);
 router.post('/absences', requireRole('teacher'), createTeacherAbsence);
 
-// Admin routes for teacher management
+// Admin routes for teacher management - with picture upload
 router.get('/all', requireRole('admin'), getAllTeachers);
-router.post('/', requireRole('admin'), createTeacher);
-router.put('/:teacherId', requireRole('admin'), updateTeacher);
+router.post('/', requireRole('admin'), upload.single('picture'), createTeacher);
+router.put('/:teacherId', requireRole('admin'), upload.single('picture'), updateTeacher);
 router.delete('/:teacherId', requireRole('admin'), deleteTeacher);
 
 // Admin routes for teacher absences
@@ -55,4 +56,3 @@ router.post('/timetable', requireRole('admin'), createTimetableEntry);
 router.delete('/timetable/:entryId', requireRole('admin'), deleteTimetableEntry);
 
 export default router;
-

@@ -18,7 +18,17 @@ function getApiBaseUrl(): string {
   return `http://${hostname}:5000/api`;
 }
 
+// Get base URL for static files (uploads)
+function getUploadsBaseUrl(): string {
+  const hostname = window.location.hostname;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:5000';
+  }
+  return `http://${hostname}:5000`;
+}
+
 const API_BASE_URL = getApiBaseUrl();
+export const UPLOADS_BASE_URL = getUploadsBaseUrl();
 
 console.log('🔗 API Base URL:', API_BASE_URL);
 

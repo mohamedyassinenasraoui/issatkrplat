@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../services/api';
+import api, { UPLOADS_BASE_URL } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { StudentProfile } from '../../types/auth';
 import { 
@@ -100,7 +100,7 @@ const StudentDashboard: React.FC = () => {
           <div className="relative">
             <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-4 border-white/20 shadow-xl bg-white/10">
               {profile?.picture ? (
-                <img src={profile.picture} alt="Profile" className="w-full h-full object-cover" />
+                <img src={profile.picture.startsWith('http') ? profile.picture : `${UPLOADS_BASE_URL}${profile.picture}`} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center">
                   <span className="text-3xl font-bold text-white">

@@ -237,6 +237,12 @@ export const createTeacher = async (req, res) => {
     });
     await user.save();
 
+    // Handle picture upload
+    let picture = null;
+    if (req.file) {
+      picture = `/uploads/${req.file.filename}`;
+    }
+
     // Create teacher profile
     const profile = new TeacherProfile({
       user: user._id,
@@ -249,6 +255,7 @@ export const createTeacher = async (req, res) => {
       modules: modules || [],
       phone,
       office,
+      picture,
     });
     await profile.save();
 
@@ -266,7 +273,12 @@ export const createTeacher = async (req, res) => {
 export const updateTeacher = async (req, res) => {
   try {
     const { teacherId } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
+
+    // Handle picture upload
+    if (req.file) {
+      updates.picture = `/uploads/${req.file.filename}`;
+    }
 
     const teacher = await TeacherProfile.findByIdAndUpdate(
       teacherId,

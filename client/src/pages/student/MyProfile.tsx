@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { StudentProfile } from '../../types/auth';
 import { User, Mail, GraduationCap, Hash, Users, BookOpen, AlertTriangle } from 'lucide-react';
+import { UPLOADS_BASE_URL } from '../../services/api';
 
 const MyProfile: React.FC = () => {
   const { profile: rawProfile, user } = useAuth();
@@ -30,9 +31,9 @@ const MyProfile: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 pb-6 border-b border-gray-100 dark:border-slate-700">
           {profile.picture ? (
             <img
-              src={profile.picture}
+              src={profile.picture.startsWith('http') ? profile.picture : `${UPLOADS_BASE_URL}${profile.picture}`}
               alt="Profile"
-              className="w-28 h-28 rounded-full object-cover border-4 border-issat-navy dark:border-blue-400 shadow-lg"
+              className="w-28 h-28 rounded-full object-cover border-4 border-[#1E3A5F] dark:border-blue-400 shadow-lg"
             />
           ) : (
             <div className="w-28 h-28 rounded-full bg-gradient-to-br from-issat-navy to-issat-navyLight dark:from-blue-500 dark:to-blue-600 flex items-center justify-center shadow-lg">

@@ -56,6 +56,12 @@ export const createStudent = async (req, res) => {
     });
     await user.save();
 
+    // Handle picture upload
+    let picture = null;
+    if (req.file) {
+      picture = `/uploads/${req.file.filename}`;
+    }
+
     // Create student profile
     const profile = new StudentProfile({
       user: user._id,
@@ -67,6 +73,7 @@ export const createStudent = async (req, res) => {
       group,
       username,
       adminPassword,
+      picture,
     });
     await profile.save();
 
@@ -84,7 +91,12 @@ export const createStudent = async (req, res) => {
 export const updateStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
+
+    // Handle picture upload
+    if (req.file) {
+      updates.picture = `/uploads/${req.file.filename}`;
+    }
 
     const student = await StudentProfile.findByIdAndUpdate(
       studentId,
