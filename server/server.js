@@ -89,6 +89,25 @@ app.use('/api/teacher', teacherRoutes);
 app.use('/api/classhub', classhubRoutes);
 app.use('/api/timetable', timetableRoutes);
 
+// Serve static files from React app in production
+if (process.env.NODE_ENV === 'production') {
+  const clientPath = path.join(__dirname, '../client/dist');
+  app.use(express.static(clientPath));
+  
+  // Serve React app for all non-API routes
+  app.get('*', (req, res) => {
+    // Don't serve React app for API routes
+    if (req.path.startsWith('/api')) {
+      return res.status(404).json({
+        error: 'Route not found',
+        method: req.method,
+        path: req.originalUrl,
+      });
+    }
+    res.sendFile(path.join(clientPath, 'index.html'));
+  });
+}
+
 // 404 handler for undefined API routes (MUST BE LAST)
 app.use('/api/*', (req, res) => {
   console.log(`❌ 404 - Route not found: ${req.method} ${req.originalUrl}`);
@@ -112,7 +131,7 @@ app.use('/api/*', (req, res) => {
 const MONGODB_URI = (process.env.MONGODB_URI || 'mongodb://localhost:27017/issat').trim();
 
 // Start server even if MongoDB connection fails (for testing)
-const PORT = 5001; // Explicitly set port to 5001 as requested
+const PORT = process.env.PORT || 5001;
 
 mongoose
   .connect(MONGODB_URI)
