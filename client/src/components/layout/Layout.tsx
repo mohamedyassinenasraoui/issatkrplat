@@ -67,6 +67,37 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isStudent = user?.role === 'student';
   const isTeacher = user?.role === 'teacher';
 
+  // Logo Component
+  const Logo = ({ size = 'md', showText = true }: { size?: 'sm' | 'md' | 'lg', showText?: boolean }) => {
+    const sizeClasses = {
+      sm: 'w-8 h-8',
+      md: 'w-10 h-10',
+      lg: 'w-12 h-12',
+    };
+    
+    return (
+      <div className="flex items-center space-x-3">
+        <div className={`${sizeClasses[size]} rounded-xl overflow-hidden flex-shrink-0 bg-white p-1`}>
+          <img 
+            src="/images/logoissatkr.png" 
+            alt="ISSAT Kairouan" 
+            className="w-full h-full object-contain"
+          />
+        </div>
+        {showText && (
+          <div className="overflow-hidden">
+            <span className="font-bold text-[#1E3A5F] dark:text-white block whitespace-nowrap">
+              ISSAT<span className="text-[#C41E3A]">KR</span>
+            </span>
+            <span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">
+              {isStudent ? 'Espace Étudiant' : isTeacher ? 'Espace Enseignant' : 'Administration'}
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Student Layout with Sidebar
   if (isStudent) {
     return (
@@ -81,12 +112,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-issat-navy rounded-lg flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-white" />
-                </div>
-                <span className="font-bold text-issat-navy dark:text-white">ISSAT</span>
-              </div>
+              <Logo size="sm" showText={false} />
+              <span className="font-bold text-[#1E3A5F] dark:text-white">ISSAT<span className="text-[#C41E3A]">KR</span></span>
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -97,7 +124,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               </button>
               <button
                 onClick={handleLogout}
-                className="p-2 text-issat-red hover:bg-issat-red/10 rounded-lg"
+                className="p-2 text-[#C41E3A] hover:bg-[#C41E3A]/10 rounded-lg"
               >
                 <LogOut className="h-5 w-5" />
               </button>
@@ -114,15 +141,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
             <div className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-slate-800 shadow-xl">
               <div className="p-4 border-b border-gray-200 dark:border-slate-700">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-issat-navy rounded-lg flex items-center justify-center">
-                    <GraduationCap className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-issat-navy dark:text-white block">ISSAT Kairouan</span>
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Espace Étudiant</span>
-                  </div>
-                </div>
+                <Logo size="md" />
               </div>
               <nav className="p-4 space-y-1">
                 {navItems.map((item) => {
@@ -135,7 +154,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                         isActive
-                          ? 'bg-issat-navy text-white shadow-lg shadow-issat-navy/25'
+                          ? 'bg-[#1E3A5F] text-white shadow-lg shadow-[#1E3A5F]/25'
                           : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700'
                       }`}
                     >
@@ -159,22 +178,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Sidebar Header */}
             <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-slate-700">
               <Link to="/student/dashboard" className="flex items-center space-x-3 overflow-hidden">
-                <div className="w-10 h-10 bg-issat-navy rounded-xl flex items-center justify-center flex-shrink-0">
-                  <GraduationCap className="w-6 h-6 text-white" />
-                </div>
-                {sidebarOpen && (
-                  <div className="overflow-hidden">
-                    <span className="font-bold text-issat-navy dark:text-white block whitespace-nowrap">ISSAT Kairouan</span>
-                    <span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">Espace Étudiant</span>
-                  </div>
-                )}
+                <Logo size="md" showText={sidebarOpen} />
               </Link>
             </div>
 
             {/* Toggle Button */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="absolute -right-3 top-20 w-6 h-6 bg-issat-navy text-white rounded-full flex items-center justify-center shadow-lg hover:bg-issat-navyLight transition-colors"
+              className="absolute -right-3 top-20 w-6 h-6 bg-[#1E3A5F] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#2a5a8f] transition-colors"
             >
               {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
@@ -191,7 +202,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     title={!sidebarOpen ? item.label : undefined}
                     className={`flex items-center ${sidebarOpen ? 'space-x-3 px-4' : 'justify-center px-2'} py-3 rounded-xl text-sm font-medium transition-all ${
                       isActive
-                        ? 'bg-issat-navy text-white shadow-lg shadow-issat-navy/25'
+                        ? 'bg-[#1E3A5F] text-white shadow-lg shadow-[#1E3A5F]/25'
                         : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700'
                     }`}
                   >
@@ -206,8 +217,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="p-3 border-t border-gray-200 dark:border-slate-700">
               {sidebarOpen ? (
                 <div className="flex items-center space-x-3 px-3 py-2 mb-2">
-                  <div className="w-10 h-10 bg-issat-navy/10 dark:bg-slate-700 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-issat-navy dark:text-blue-400" />
+                  <div className="w-10 h-10 bg-[#1E3A5F]/10 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-[#1E3A5F] dark:text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
@@ -218,8 +229,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
               ) : (
                 <div className="flex justify-center mb-2">
-                  <div className="w-10 h-10 bg-issat-navy/10 dark:bg-slate-700 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-issat-navy dark:text-blue-400" />
+                  <div className="w-10 h-10 bg-[#1E3A5F]/10 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-[#1E3A5F] dark:text-blue-400" />
                   </div>
                 </div>
               )}
@@ -235,7 +246,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <button
                   onClick={handleLogout}
                   title="Déconnexion"
-                  className={`${sidebarOpen ? 'flex-1' : ''} p-2 rounded-lg bg-issat-red/10 text-issat-red hover:bg-issat-red hover:text-white transition-colors flex items-center justify-center`}
+                  className={`${sidebarOpen ? 'flex-1' : ''} p-2 rounded-lg bg-[#C41E3A]/10 text-[#C41E3A] hover:bg-[#C41E3A] hover:text-white transition-colors flex items-center justify-center`}
                 >
                   <LogOut className="h-5 w-5" />
                 </button>
@@ -261,7 +272,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     );
   }
 
-  // Teacher Layout with Sidebar (similar to student)
+  // Teacher Layout with Sidebar
   if (isTeacher) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
@@ -275,12 +286,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-white" />
-                </div>
-                <span className="font-bold text-emerald-600 dark:text-white">ISSAT</span>
-              </div>
+              <Logo size="sm" showText={false} />
+              <span className="font-bold text-[#1E3A5F] dark:text-white">ISSAT<span className="text-[#C41E3A]">KR</span></span>
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -291,7 +298,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               </button>
               <button
                 onClick={handleLogout}
-                className="p-2 text-issat-red hover:bg-issat-red/10 rounded-lg"
+                className="p-2 text-[#C41E3A] hover:bg-[#C41E3A]/10 rounded-lg"
               >
                 <LogOut className="h-5 w-5" />
               </button>
@@ -308,15 +315,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
             <div className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-slate-800 shadow-xl">
               <div className="p-4 border-b border-gray-200 dark:border-slate-700">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-emerald-600 dark:text-white block">ISSAT Kairouan</span>
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Espace Enseignant</span>
-                  </div>
-                </div>
+                <Logo size="md" />
               </div>
               <nav className="p-4 space-y-1">
                 {teacherNavItems.map((item) => {
@@ -329,7 +328,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                         isActive
-                          ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25'
+                          ? 'bg-[#1E3A5F] text-white shadow-lg shadow-[#1E3A5F]/25'
                           : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700'
                       }`}
                     >
@@ -353,22 +352,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Sidebar Header */}
             <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-slate-700">
               <Link to="/teacher/dashboard" className="flex items-center space-x-3 overflow-hidden">
-                <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <BookOpen className="w-6 h-6 text-white" />
-                </div>
-                {sidebarOpen && (
-                  <div className="overflow-hidden">
-                    <span className="font-bold text-emerald-600 dark:text-white block whitespace-nowrap">ISSAT Kairouan</span>
-                    <span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">Espace Enseignant</span>
-                  </div>
-                )}
+                <Logo size="md" showText={sidebarOpen} />
               </Link>
             </div>
 
             {/* Toggle Button */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="absolute -right-3 top-20 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-emerald-700 transition-colors"
+              className="absolute -right-3 top-20 w-6 h-6 bg-[#1E3A5F] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#2a5a8f] transition-colors"
             >
               {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
@@ -385,7 +376,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     title={!sidebarOpen ? item.label : undefined}
                     className={`flex items-center ${sidebarOpen ? 'space-x-3 px-4' : 'justify-center px-2'} py-3 rounded-xl text-sm font-medium transition-all ${
                       isActive
-                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25'
+                        ? 'bg-[#1E3A5F] text-white shadow-lg shadow-[#1E3A5F]/25'
                         : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700'
                     }`}
                   >
@@ -400,8 +391,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="p-3 border-t border-gray-200 dark:border-slate-700">
               {sidebarOpen ? (
                 <div className="flex items-center space-x-3 px-3 py-2 mb-2">
-                  <div className="w-10 h-10 bg-emerald-600/10 dark:bg-slate-700 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  <div className="w-10 h-10 bg-[#1E3A5F]/10 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-[#1E3A5F] dark:text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
@@ -412,8 +403,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
               ) : (
                 <div className="flex justify-center mb-2">
-                  <div className="w-10 h-10 bg-emerald-600/10 dark:bg-slate-700 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  <div className="w-10 h-10 bg-[#1E3A5F]/10 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-[#1E3A5F] dark:text-blue-400" />
                   </div>
                 </div>
               )}
@@ -429,7 +420,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <button
                   onClick={handleLogout}
                   title="Déconnexion"
-                  className={`${sidebarOpen ? 'flex-1' : ''} p-2 rounded-lg bg-issat-red/10 text-issat-red hover:bg-issat-red hover:text-white transition-colors flex items-center justify-center`}
+                  className={`${sidebarOpen ? 'flex-1' : ''} p-2 rounded-lg bg-[#C41E3A]/10 text-[#C41E3A] hover:bg-[#C41E3A] hover:text-white transition-colors flex items-center justify-center`}
                 >
                   <LogOut className="h-5 w-5" />
                 </button>
@@ -467,11 +458,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               to="/admin/dashboard" 
               className="flex items-center space-x-3"
             >
-              <div className="w-10 h-10 bg-issat-navy rounded-lg flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 rounded-xl overflow-hidden bg-white p-1 flex-shrink-0">
+                <img 
+                  src="/images/logoissatkr.png" 
+                  alt="ISSAT Kairouan" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="hidden sm:block">
-                <span className="text-lg font-bold text-issat-navy dark:text-white">ISSAT Kairouan</span>
+                <span className="text-lg font-bold text-[#1E3A5F] dark:text-white">ISSAT<span className="text-[#C41E3A]">KR</span></span>
                 <span className="block text-xs text-gray-500 dark:text-slate-400">Administration</span>
               </div>
             </Link>
@@ -487,8 +482,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     to={item.path}
                     className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-issat-navy text-white'
-                        : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-issat-navy dark:hover:text-white'
+                        ? 'bg-[#1E3A5F] text-white'
+                        : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-[#1E3A5F] dark:hover:text-white'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -516,7 +511,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 px-4 py-2 bg-issat-red/10 text-issat-red hover:bg-issat-red hover:text-white rounded-lg transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 bg-[#C41E3A]/10 text-[#C41E3A] hover:bg-[#C41E3A] hover:text-white rounded-lg transition-colors"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline text-sm font-medium">Déconnexion</span>
@@ -545,7 +540,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium ${
                       isActive
-                        ? 'bg-issat-navy text-white'
+                        ? 'bg-[#1E3A5F] text-white'
                         : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
                     }`}
                   >
