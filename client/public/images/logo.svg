@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="white" stroke="#1E3A5F" stroke-width="3"/>
+  
+  <!-- Gear teeth (right side) -->
+  <path d="M160 60 L175 55 L180 70 L165 75 Z" fill="#1E3A5F"/>
+  <path d="M175 85 L190 85 L190 100 L175 100 Z" fill="#1E3A5F"/>
+  <path d="M175 115 L190 115 L190 130 L175 130 Z" fill="#1E3A5F"/>
+  <path d="M160 145 L175 150 L170 165 L155 160 Z" fill="#1E3A5F"/>
+  
+  <!-- Circuit lines (left side) -->
+  <path d="M20 100 L40 100 L40 80 L60 80" stroke="#1E3A5F" stroke-width="2" fill="none"/>
+  <path d="M20 120 L35 120 L35 140 L55 140" stroke="#1E3A5F" stroke-width="2" fill="none"/>
+  <circle cx="60" cy="80" r="4" fill="#1E3A5F"/>
+  <circle cx="55" cy="140" r="4" fill="#1E3A5F"/>
+  
+  <!-- Mosque/Building silhouette -->
+  <g fill="#C41E3A">
+    <!-- Main dome -->
+    <ellipse cx="100" cy="95" rx="30" ry="25"/>
+    <!-- Dome top -->
+    <path d="M100 70 L103 60 L100 55 L97 60 Z"/>
+    
+    <!-- Minaret (left tower) -->
+    <rect x="55" y="85" width="12" height="55"/>
+    <path d="M61 85 L55 70 L67 70 Z"/>
+    <path d="M61 70 L58 60 L61 55 L64 60 Z"/>
+    
+    <!-- Base wall -->
+    <rect x="50" y="130" width="100" height="20"/>
+    
+    <!-- Wall details -->
+    <rect x="55" y="132" width="8" height="10" fill="#A11830"/>
+    <rect x="70" y="132" width="8" height="10" fill="#A11830"/>
+    <rect x="85" y="132" width="8" height="10" fill="#A11830"/>
+    <rect x="100" y="132" width="8" height="10" fill="#A11830"/>
+    <rect x="115" y="132" width="8" height="10" fill="#A11830"/>
+    <rect x="130" y="132" width="8" height="10" fill="#A11830"/>
+  </g>
+  
+  <!-- Arch connecting gear and circuit -->
+  <path d="M45 55 Q100 20 155 55" stroke="#1E3A5F" stroke-width="2" fill="none"/>
+</svg>
+
