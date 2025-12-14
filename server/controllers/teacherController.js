@@ -5,6 +5,7 @@ import ClassHubMessage from '../models/ClassHub.js';
 import TeacherAbsence from '../models/TeacherAbsence.js';
 import StudentProfile from '../models/StudentProfile.js';
 import Module from '../models/Module.js';
+import Notification from '../models/Notification.js';
 
 // Get teacher profile
 export const getTeacherProfile = async (req, res) => {
@@ -187,13 +188,29 @@ export const createTeacherAbsence = async (req, res) => {
 
     await absence.save();
 
+    // Create notification for all admins
+    const admins = await User.find({ role: 'admin' });
+    const absenceDate = new Date(date).toLocaleDateString('fr-FR');
+    const timeRange = startTime && endTime ? ` de ${startTime} à ${endTime}` : startTime ? ` à partir de ${startTime}` : '';
+    
+    for (const admin of admins) {
+      await Notification.create({
+        user: admin._id,
+        title: 'Demande d\'absence - Professeur',
+        message: `Le professeur ${teacher.firstName} ${teacher.lastName} (${teacher.department}) a demandé une absence le ${absenceDate}${timeRange}.\n\nRaison: ${reason}${description ? `\n\n${description}` : ''}`,
+        type: 'warning',
+        link: `/admin/teachers`,
+        read: false,
+      });
+    }
+
     // If notifyStudents is true, create a ClassHub message
     if (absence.notifyStudents) {
       const classHubMessage = new ClassHubMessage({
         teacher: teacher._id,
         filieres: absence.affectedFilieres,
-        title: `Absence du professeur - ${new Date(date).toLocaleDateString('fr-FR')}`,
-        content: `Le professeur ${teacher.firstName} ${teacher.lastName} sera absent le ${new Date(date).toLocaleDateString('fr-FR')}${startTime ? ` de ${startTime}` : ''}${endTime ? ` à ${endTime}` : ''}.\n\nRaison: ${reason}${description ? `\n\n${description}` : ''}`,
+        title: `Absence du professeur - ${absenceDate}`,
+        content: `Le professeur ${teacher.firstName} ${teacher.lastName} sera absent le ${absenceDate}${timeRange}.\n\nRaison: ${reason}${description ? `\n\n${description}` : ''}`,
         type: 'announcement',
         isPinned: true,
       });
